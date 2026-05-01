@@ -46,7 +46,10 @@ Copy-Item .env.example .env
 
 ## 4. Write env keys
 
-Then write the following keys to youre env or do it manually.
+# Github Token
+1. Create GitHub account or log in
+2. Go to Settings → Developer settings (bottom) → Personal access tokens → Fine-grained tokens.
+3. Generate token.
 
 ```bash
 echo 'GITHUB_TOKEN=your_token_here >> .env
