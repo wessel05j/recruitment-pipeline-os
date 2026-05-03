@@ -1,8 +1,10 @@
 import os
+import json
 from dotenv import load_dotenv
 
 from app.ai.account_manager import AccountManager
 from app.ai.reqruitment_consultant import RecruitmentConsultant
+from app.sources.github_search import GitHubCandidateSearchRunner
 
 def init():
     load_dotenv()
@@ -66,16 +68,39 @@ def main():
         # Recruitment Consultant - Candidate sourcing
         ###########################################################
         print("\n=== Recruitment Consultant ===")
-        print("Converting job brief into search parameters")
-        consultant = RecruitmentConsultant()
-        result = consultant.run()
-        print(result["status"])
-        if result["status"] == "APPROVED":
-            print(f"Location: {result['location']}")
-            print(f"Required languages: {result['required_languages']}")
-            print(f"Bio keys: {result['bio_keys']}")
+        search_params_path = "app/temp/github_search_params.json"
+        if os.path.exists(search_params_path):
+            print(f"Search parameters already exist at {search_params_path}. Skipping Recruitment Consultant.")
         else:
-            print(result["message"])
+            print("Converting job brief into search parameters")
+            consultant = RecruitmentConsultant()
+            result = consultant.run()
+            print(result["status"])
+            if result["status"] == "APPROVED":
+                print("Search parameters approved and saved.\n")
+            else:
+                print(result["message"])
+
+
+        # Searching
+        candidates_path = "app/temp/github_candidates.json"
+        if os.path.exists(candidates_path):
+            print(f"Candidates already exist at {candidates_path}. Skipping GitHub search.")
+        else:
+            print("\n=== GitHub Search ===")
+            print("Takes up to 30 minutes.")
+            with open(search_params_path, "r", encoding="utf-8") as file:
+                search_params = json.load(file)
+            location = search_params["location"]
+            reqruied_languages = search_params["required_languages"]
+            bio_keys = search_params["bio_keys"]
+            runner = GitHubCandidateSearchRunner(
+                location=location,
+                required_languages=reqruied_languages,
+                bio_keys=bio_keys,
+            )
+            runner.run()
+
 
         ###########################################################
         # Candidate review - Internal review of candidates
