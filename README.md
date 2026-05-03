@@ -51,8 +51,16 @@ Copy-Item .env.example .env
 2. Go to Settings → Developer settings (bottom) → Personal access tokens → Fine-grained tokens.
 3. Generate token.
 
+# Openai Token
+1. Go to https://platform.openai.com
+2. API Keys
+3. Create Secret key
+
 ```bash
 echo 'GITHUB_TOKEN=your_token_here >> .env
+```
+```bash
+echo 'OPENAI_API_KEY=your_token_here >> .env
 ```
 
 ## 5. Run project
