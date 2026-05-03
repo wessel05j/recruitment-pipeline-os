@@ -5,6 +5,7 @@ from typing import List, Optional
 from app.sources.github import GitHubCandidateSearcher
 
 class GitHubCandidateSearchRunner:
+    '''Runs a GitHub candidate search and saves results to a JSON file.'''
     OUTPUT_DIR = Path("app/temp")
     OUTPUT_FILE = "github_candidates.json"
 
