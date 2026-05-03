@@ -135,6 +135,8 @@ class GitHubCandidateSearcher:
                 "q": query,
                 "per_page": self.LIMIT_PER_PAGE,
                 "page": page,
+                "sort": "followers",
+                "order": "desc",
             },
         )
 
