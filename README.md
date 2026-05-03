@@ -1,8 +1,10 @@
 ### recruitment-pipeline-os
 
-A recruitment automation project that simulates the core workflow of a permanent recruitment agency.
+A recruitment automation project that replaces the core workflow of a recruitment agency.
 
 The system takes a company’s rough hiring request and turns it into a structured recruitment process: job understanding, search planning, candidate sourcing, candidate matching, quality review, compliance review, and final client-ready shortlist reports.
+
+It uses AI models and runs off Openai's: gpt-5-mini model.
 
 ### How to setup
 
