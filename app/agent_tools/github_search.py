@@ -1,40 +1,63 @@
+import json
+from pathlib import Path
+from typing import List, Optional
+
 from app.sources.github import GitHubCandidateSearcher
 
+class GitHubCandidateSearchRunner:
+    OUTPUT_DIR = Path("app/temp")
+    OUTPUT_FILE = "github_candidates.json"
 
-def main() -> None:
-    searcher = GitHubCandidateSearcher()
+    def __init__(
+        self,
+        location: str,
+        required_languages: List[str],
+        bio_keys: Optional[List[str]] = None,
+    ):
+        self.location = location
+        self.required_languages = required_languages
+        self.bio_keys = bio_keys or []
 
-    candidates = searcher.search(
-        location="Norway",
-        required_languages=["JavaScript"],
-        bio_keys=[
-            "AI",
-            "Artificial Intelligence",
-            "Machine Learning",
-            "ML",
-            "Cybersecurity",
-            "Security",
-            "Data Science",
-            "Backend",
-            "Full Stack",
-            "Software Engineer",
-        ],
-    )
+        self._validate()
 
-    print(f"Found {len(candidates)} candidates")
+    def run(self) -> Path:
+        searcher = GitHubCandidateSearcher()
 
-    for candidate in candidates:
-        print("-" * 60)
-        print(f"Name: {candidate['name']}")
-        print(f"Username: {candidate['username']}")
-        print(f"Bio: {candidate['bio']}")
-        print(f"Company: {candidate['company']}")
-        print(f"Location: {candidate['location']}")
-        print(f"Email: {candidate['email']}")
-        print(f"GitHub: {candidate['github_profile_url']}")
-        print(f"Languages: {candidate['language_counts']}")
-        print(f"Latest push: {candidate['latest_repo_push']}")
+        candidates = searcher.search(
+            location=self.location,
+            required_languages=self.required_languages,
+            bio_keys=self.bio_keys,
+        )
 
+        self.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-if __name__ == "__main__":
-    main()
+        output_path = self.OUTPUT_DIR / self.OUTPUT_FILE
+
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(
+                {
+                    "location": self.location,
+                    "required_languages": self.required_languages,
+                    "bio_keys": self.bio_keys,
+                    "candidate_count": len(candidates),
+                    "candidates": candidates,
+                },
+                file,
+                ensure_ascii=False,
+                indent=2,
+            )
+
+        return output_path
+
+    def _validate(self) -> None:
+        if not self.location or not isinstance(self.location, str):
+            raise ValueError("location is required and must be a string.")
+
+        if not self.required_languages or not isinstance(self.required_languages, list):
+            raise ValueError("required_languages is required and must be a non-empty list.")
+
+        if not all(isinstance(lang, str) and lang.strip() for lang in self.required_languages):
+            raise ValueError("Each required language must be a non-empty string.")
+
+        if self.bio_keys and not all(isinstance(key, str) and key.strip() for key in self.bio_keys):
+            raise ValueError("Each bio key must be a non-empty string.")
