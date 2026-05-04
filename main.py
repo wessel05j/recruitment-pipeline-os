@@ -116,7 +116,7 @@ def main():
         else:
             panel = CandidateReviewPanel(max_candidates=1)
             review_paths = panel.run()
-
+            
             for path in review_paths:
                 print(f"Candidate review saved: {path}")
 

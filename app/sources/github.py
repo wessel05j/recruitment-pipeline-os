@@ -55,7 +55,14 @@ class GitHubCandidateSearcher:
         results: List[Dict[str, Any]] = []
         checked_usernames: Set[str] = set()
 
-        for language in required_languages:
+        language_count = max(1, len(required_languages))
+        per_language_quota = max(1, self.MAX_CANDIDATES // language_count)
+        extra_slots = self.MAX_CANDIDATES - (per_language_quota * language_count)
+
+        for index, language in enumerate(required_languages):
+            language_quota = per_language_quota + (1 if index < extra_slots else 0)
+            language_added = 0
+
             for page in range(1, self.MAX_SEARCH_PAGES_PER_LANGUAGE + 1):
                 users = self._search_user_page(
                     location=location,
@@ -69,6 +76,9 @@ class GitHubCandidateSearcher:
                 for user in users:
                     if len(results) >= self.MAX_CANDIDATES:
                         return results
+
+                    if language_added >= language_quota:
+                        break
 
                     username = user.get("login")
 
@@ -91,6 +101,10 @@ class GitHubCandidateSearcher:
 
                     if candidate:
                         results.append(candidate)
+                        language_added += 1
+
+                if language_added >= language_quota:
+                    break
 
         return results
 
