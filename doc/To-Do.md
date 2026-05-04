@@ -6,61 +6,61 @@ Step-by-step development plan for `recruitment-pipeline-os`.
 
 The first version should support:
 
-- [] Company submits hiring request
-- [] System creates structured job brief
-- [] System ranks candidates
+- [x] Company submits hiring request
+- [x] System creates structured job brief
+- [x] System ranks candidates
 - [] System creates shortlist report
 - [] Human can review before requesting interview
 - [] Proper GDPR
 
 ## 0.1. General Project Setup
 
-- [] Decide tech stack (TUI)
-- [] Create project structure
-- [] Set up database (SQLite)
-- [] Add environment variables
-- [] Add basic documentation
+- [x] Decide tech stack (TUI)
+- [x] Create project structure
+- [] Set up database (json for now)
+- [x] Add environment variables
+- [x] Add basic documentation
 - [] Add license
 
 ## 1. Client Input
 
-- [] Create a simple input where a company can submit a hiring request
+- [x] Create a simple input where a company can submit a hiring request
 
 ## 2. Job Understanding
 
-- [] Build Account Manager logic
-- [] Extract structured job details from the hiring request
-- [] Identify missing information
-- [] Generate clarification questions
-- [] Save the final structured job brief
+- [x] Build Account Manager logic
+- [x] Extract structured job details from the hiring request
+- [x] Identify missing information
+- [x] Generate clarification questions
+- [x] Save the final structured job brief
 
 ## 3. Search Planning
 
-- [] Build Recruitment Consultant logic
-- [] Generate target job titles
-- [] Generate required and optional skill lists
-- [] Generate search keywords
-- [] Define candidate exclusion rules
-- [] Create a search strategy for the specific job opening
+- [x] Build Recruitment Consultant logic
+- [x] Generate target job titles
+- [x] Generate required and optional skill lists
+- [x] Generate search keywords
+- [x] Define candidate exclusion rules
+- [x] Create a search strategy for the specific job opening
 
 ## 4. Candidate Sourcing
 
-- [] Build Sourcer logic
-- [] Define which candidate source to use (1 Strong for now: Linkedin?)
-- [] Search for candidates based on the specific job opening
-- [] Extract candidate profile data from source
-- [] Store candidate source and evidence
-- [] Save raw source links for verification
+- [x] Build Sourcer logic
+- [x] Define which candidate source to use (1 Strong for now: Linkedin?)
+- [x] Search for candidates based on the specific job opening
+- [x] Extract candidate profile data from source
+- [x] Store candidate source and evidence
+- [x] Save raw source links for verification
 
 ## 5. Candidate Matching
 
-- [] Build candidate scoring system
-- [] Compare candidates against the job brief
-- [] Score must-have skills
-- [] Score experience and seniority
-- [] Score location and work model fit
-- [] Score nice-to-have skills
-- [] Generate match explanations
+- [x] Build candidate scoring system
+- [x] Compare candidates against the job brief
+- [x] Score must-have skills
+- [x] Score experience and seniority
+- [x] Score location and work model fit
+- [x] Score nice-to-have skills
+- [x] Generate match explanations
 
 ## 6. Candidate Review
 

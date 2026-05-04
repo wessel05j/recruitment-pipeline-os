@@ -11,7 +11,7 @@ It uses AI models and runs off Openai's: gpt-5-mini model.
 ## 1. Clone Repo
 ```bash
 git clone https://github.com/wessel05j/recruitment-pipeline-os
-cd reqruitment-pipeline-os
+cd recruitment-pipeline-os
 ```
 
 ## 2. Create venv
@@ -59,10 +59,10 @@ Copy-Item .env.example .env
 3. Create Secret key
 
 ```bash
-echo 'GITHUB_TOKEN=your_token_here >> .env
+echo 'GITHUB_TOKEN=your_token_here' >> .env
 ```
 ```bash
-echo 'OPENAI_API_KEY=your_token_here >> .env
+echo 'OPENAI_API_KEY=your_token_here' >> .env
 ```
 
 ## 5. Run project
