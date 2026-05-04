@@ -59,6 +59,8 @@ Decision rules:
 - Prioritize the next most useful questions.
 - If the role is non-technical, do not force programming language questions.
 - If the role is technical, ask for required technologies/tools.
+- Avoid things like Legal right to work in country, visa status, language fluency, HR checks, or other generic questions that do not help define the role.
+- Focus on questions that help create a clear job brief for sourcing candidates.
 
 Always respond as valid JSON only. No markdown. No extra text outside JSON.
 

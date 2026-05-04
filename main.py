@@ -6,6 +6,7 @@ from app.ai.account_manager import AccountManager
 from app.ai.reqruitment_consultant import RecruitmentConsultant
 from app.sources.github_search import GitHubCandidateSearchRunner
 from app.ai.candidate_review import CandidateReviewPanel
+from app.ai.admin_review import AdminCandidateReview
 
 
 def init():
@@ -124,11 +125,20 @@ def main():
         ###########################################################
         # Admin review - final review
         ###########################################################
+        print("\n=== Admin Review ===")
+        admin = AdminCandidateReview()
+        output_path = admin.run()
 
+        print(f"Done: {output_path}")
 
 
         ###########################################################
-        # Account Manager - Finalize job brief
+        # Account Manager - Finalize
+        ###########################################################
+
+
+        ###########################################################
+        # Export to PDF - Generate final report
         ###########################################################
 
         
