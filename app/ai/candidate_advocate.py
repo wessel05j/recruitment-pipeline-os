@@ -54,7 +54,7 @@ If round = 1, return valid JSON only in this format:
   "round": 1,
   "argument": "Short positive case for the candidate.",
   "strengths": ["strength 1", "strength 2"],
-  "suggested_score": "<integer 0-100>"
+  "suggested_score": <integer 0-100>
 }
 
 If round = 2 or 3, return valid JSON only in this format:
@@ -62,7 +62,7 @@ If round = 2 or 3, return valid JSON only in this format:
   "role": "candidate_advocate",
   "round": 2,
   "rebuttals": ["rebuttal 1", "rebuttal 2"],
-  "suggested_score": "<integer 0-100>"
+  "suggested_score": <integer 0-100>
 }
 """
 

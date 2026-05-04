@@ -64,7 +64,7 @@ Decision rules:
 Return valid JSON only:
 {
   "candidate_username": "username",
-  "final_score": "<integer 0-100>",
+  "final_score": <integer 0-100>,
   "recommendation": "CONTACT",
   "summary": "Short technical sourcing evaluation.",
   "key_strengths": ["strength 1", "strength 2"],
