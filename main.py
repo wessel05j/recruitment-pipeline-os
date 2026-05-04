@@ -77,7 +77,7 @@ def main():
             result = consultant.run()
             print(result["status"])
             if result["status"] == "APPROVED":
-                print("Search parameters approved and saved.\n")
+                print("Search parameters approved and saved.")
             else:
                 print(result["message"])
 

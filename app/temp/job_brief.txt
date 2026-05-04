@@ -1,50 +1,71 @@
-Role title: Senior AI Prompt Engineer
+Role title: Senior Software Engineer
 Location: Norway (onsite 50% / hybrid)
 Work setup: Hybrid — expected onsite ~50% (typically 2–3 days/week)
 Employment type: Full-time (permanent)
 Seniority: Senior — individual contributor (minimum 5 years relevant experience)
-Company / industry context: Product startup building AI-powered products that integrate LLMs into customer-facing features. Fast-paced, cross-functional product and engineering teams.
-Role summary: Senior individual-contributor focused on designing, testing and integrating high-quality prompts and prompt workflows for OpenAI-based products. Own prompt lifecycle from design and evaluation to deployment and monitoring, working closely with product, ML and engineering teams to deliver robust, cost-effective LLM-driven features.
+
+Company / industry context: Product startup building AI-powered software products. Fast-paced, cross-functional product and engineering teams.
+
+Role summary: Senior individual-contributor focused on designing, building, testing, and maintaining scalable software systems for AI-powered products. Own backend/product engineering work from architecture and implementation to deployment, monitoring, and continuous improvement, working closely with product, ML, and engineering teams.
+
 Main responsibilities:
-- Design, iterate and optimise prompts, templates and few-shot examples for product features.
-- Implement prompt integrations with OpenAI APIs and product backend using Python.
-- Define and run evaluation frameworks and metrics (accuracy, safety, cost, latency) and iterate based on results.
-- Build and maintain prompt libraries, versioning and documentation/best practices.
-- Collaborate with product managers, ML engineers and designers to translate requirements into prompt solutions.
-- Monitor production behaviour, troubleshoot failures, tune prompts for safety and cost-efficiency.
-- Ensure prompt-related data handling meets privacy and compliance requirements.
+
+Design, build, and maintain robust backend services and product features.
+Implement integrations with APIs, databases, and internal systems using Python.
+Collaborate with product managers, ML engineers, and designers to translate requirements into reliable software solutions.
+Write clean, maintainable, well-tested code.
+Improve system performance, reliability, security, and scalability.
+Participate in architecture decisions, code reviews, and technical documentation.
+Monitor production behaviour, troubleshoot issues, and improve operational stability.
+Ensure data handling meets privacy and compliance requirements.
+
 Required skills:
-- At least 5 years experience working with LLMs/prompting in production environments.
-- Deep prompt design and prompt testing experience.
-- Strong experience integrating LLMs via OpenAI APIs.
-- Proficient in Python for prototyping and integration.
-- Strong product sensibility and ability to translate product requirements into prompt solutions.
-- Excellent communication skills in Norwegian (fluent) and English.
+
+At least 5 years experience in professional software engineering.
+Strong backend development experience.
+Proficient in Python for production software development.
+Experience designing and integrating APIs.
+Strong understanding of software architecture, testing, and maintainability.
+Strong product sensibility and ability to translate requirements into technical solutions.
+Excellent communication skills in Norwegian (fluent) and English.
+
 Required technologies/tools:
-- OpenAI API (required)
-- Python (required)
+
+Python (required)
+REST APIs / backend integrations
+Git
+Testing frameworks
+Databases
+
 Nice-to-have skills:
-- Experience with LangChain or similar orchestration frameworks.
-- Familiarity with RAG, vector databases (Pinecone, Weaviate), Hugging Face tooling.
-- Experience with fine-tuning/adapter workflows and prompt-augmentation techniques.
-- Monitoring/observability tools for models and APIs.
-- Background in ML fundamentals or applied ML engineering.
+
+Experience with AI-powered products or LLM integrations.
+Experience with cloud platforms such as AWS, Azure, or GCP.
+Familiarity with Docker and CI/CD.
+Experience with PostgreSQL or similar relational databases.
+Background in ML fundamentals or applied AI engineering.
+
 Hard requirements:
-- Must be located in Norway and able to work onsite ~50%.
-- Fluent Norwegian language skills.
-- Minimum 5 years demonstrable experience with LLMs/prompt engineering and production integrations.
-- Proven experience with OpenAI APIs and Python.
-- Legal right to work in Norway.
+
+Must be located in Norway and able to work onsite ~50%.
+Fluent Norwegian language skills.
+Minimum 5 years demonstrable software engineering experience.
+Proven experience with Python and backend development.
+Legal right to work in Norway.
+
 Candidate search keywords:
-- Senior AI Prompt Engineer
-- Prompt Engineer / Prompt Designer
-- LLM Engineer
-- OpenAI Engineer
-- Senior Prompting Specialist
-- Conversational AI Engineer
+
+Senior Software Engineer
+Senior Backend Engineer
+Python Developer
+Backend Developer
+Software Developer
+Product Engineer
+
 Candidate exclusion criteria:
-- Less than 5 years relevant experience.
-- Not fluent in Norwegian.
-- Remote-only candidates unwilling to be onsite ~50% in Norway.
-- No demonstrable experience with OpenAI APIs or Python integrations.
-- Candidates without right to work in Norway.
+
+Less than 5 years relevant experience.
+Not fluent in Norwegian.
+Remote-only candidates unwilling to be onsite ~50% in Norway.
+No demonstrable Python or backend development experience.
+Candidates without right to work in Norway.
