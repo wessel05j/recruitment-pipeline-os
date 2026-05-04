@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from app.ai.account_manager import AccountManager
 from app.ai.reqruitment_consultant import RecruitmentConsultant
 from app.sources.github_search import GitHubCandidateSearchRunner
+from app.ai.candidate_review import CandidateReviewPanel
+
 
 def init():
     load_dotenv()
@@ -82,21 +84,23 @@ def main():
                 print(result["message"])
 
 
-        # Searching
+        ###########################################################
+        # Search Engine - GitHub search for candidates
+        ###########################################################
+        print("\n=== GitHub Search ===")
         candidates_path = "app/temp/github_candidates.json"
         if os.path.exists(candidates_path):
             print(f"Candidates already exist at {candidates_path}. Skipping GitHub search.")
         else:
-            print("\n=== GitHub Search ===")
             print("Takes up to 30 minutes.")
             with open(search_params_path, "r", encoding="utf-8") as file:
                 search_params = json.load(file)
             location = search_params["location"]
-            reqruied_languages = search_params["required_languages"]
+            required_languages = search_params["required_languages"]
             bio_keys = search_params["bio_keys"]
             runner = GitHubCandidateSearchRunner(
                 location=location,
-                required_languages=reqruied_languages,
+                required_languages=required_languages,
                 bio_keys=bio_keys,
             )
             runner.run()
@@ -105,7 +109,16 @@ def main():
         ###########################################################
         # Candidate review - Internal review of candidates
         ###########################################################
+        print("\n=== Candidate Review ===")
+        revew_path = "app/temp/candidate_reviews/"
+        if os.path.exists(revew_path):
+            print(f"Candidate review already exists at {revew_path}. Skipping Candidate Review.")
+        else:
+            panel = CandidateReviewPanel(max_candidates=1)
+            review_paths = panel.run()
 
+            for path in review_paths:
+                print(f"Candidate review saved: {path}")
 
 
         ###########################################################
