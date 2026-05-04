@@ -20,7 +20,7 @@ class GitHubCandidateSearcher:
     MAX_SEARCH_PAGES_PER_LANGUAGE = 10  # GitHub max = 1000 search results
     MAX_CANDIDATES = 20
     TOP_STARRED_REPOS_LIMIT = 10
-    REQUIRE_EMAIL = False
+    REQUIRE_EMAIL = True
     REQUIRE_FULL_NAME = True
 
     def __init__(

@@ -1,71 +1,62 @@
-Role title: Senior Software Engineer
-Location: Norway (onsite 50% / hybrid)
-Work setup: Hybrid — expected onsite ~50% (typically 2–3 days/week)
-Employment type: Full-time (permanent)
-Seniority: Senior — individual contributor (minimum 5 years relevant experience)
+Role title: Junior–Mid RPA / Automation Developer
 
-Company / industry context: Product startup building AI-powered software products. Fast-paced, cross-functional product and engineering teams.
+Location: Norway (candidate must be located in Norway)
+Work setup: Fully remote
+Employment type: Full-time
+Seniority: Junior to Mid-level (approx. 1–4 years relevant automation/software experience)
+Company / industry context: Internal accounting and back-office automation for a Norwegian organisation — automating repetitive finance, bookkeeping and back-office data tasks to reduce manual work and improve data quality.
 
-Role summary: Senior individual-contributor focused on designing, building, testing, and maintaining scalable software systems for AI-powered products. Own backend/product engineering work from architecture and implementation to deployment, monitoring, and continuous improvement, working closely with product, ML, and engineering teams.
+Role summary: Build, deploy and maintain automation solutions to replace repetitive accounting and back-office tasks. Primary focus on Python-driven scripts and data work (Excel/CSV, API integrations), with occasional use of RPA platforms and ERP connectors. Collaborate with accounting staff to translate manual processes into robust automated workflows.
 
 Main responsibilities:
-
-Design, build, and maintain robust backend services and product features.
-Implement integrations with APIs, databases, and internal systems using Python.
-Collaborate with product managers, ML engineers, and designers to translate requirements into reliable software solutions.
-Write clean, maintainable, well-tested code.
-Improve system performance, reliability, security, and scalability.
-Participate in architecture decisions, code reviews, and technical documentation.
-Monitor production behaviour, troubleshoot issues, and improve operational stability.
-Ensure data handling meets privacy and compliance requirements.
+- Design and implement end-to-end automations for accounting/back-office tasks (data extraction, transform, load, reconciliation).
+- Develop Python scripts and utilities for CSV/Excel processing, data validation and transformation.
+- Integrate with third-party systems via REST APIs (JSON), extract and push data to accounting/ERP systems.
+- Build reliable error handling, logging and retry strategies; create documentation and runbooks for handover to operations.
+- Test and validate automation outputs with accounting stakeholders; iterate on feedback.
+- Maintain and update automations; support ad-hoc data cleanup and troubleshooting.
 
 Required skills:
+- Practical experience building automation using Python for data processing.
+- Strong Excel / CSV handling skills (parsing, transformation, formula familiarity; ability to script Excel workflows).
+- API integration experience (REST/JSON) and handling HTTP requests/responses in code.
+- Solid data-processing skills: parsing, validation, mapping, basic ETL patterns.
+- Problem-solving and ability to translate manual accounting steps into automated logic.
 
-At least 5 years experience in professional software engineering.
-Strong backend development experience.
-Proficient in Python for production software development.
-Experience designing and integrating APIs.
-Strong understanding of software architecture, testing, and maintainability.
-Strong product sensibility and ability to translate requirements into technical solutions.
-Excellent communication skills in Norwegian (fluent) and English.
-
-Required technologies/tools:
-
-Python (required)
-REST APIs / backend integrations
-Git
-Testing frameworks
-Databases
+Required technologies / tools (for sourcing/matching):
+- Python (evidence of scripts, repos or projects). Libraries: pandas, requests or similar.
+- Excel/CSV tooling (openpyxl, csv module, pandas IO) or demonstrable Excel automation work.
+- REST API work (requests/fetch integration examples).
+- Version control (Git) and basic coding best practices visible in public profiles.
 
 Nice-to-have skills:
+- UiPath or Power Automate / Power Platform experience.
+- SQL for data queries and small ETL tasks.
+- Experience with Norwegian accounting / ERP systems (Tripletex, Visma) or Microsoft Dynamics.
+- Prior exposure to invoice processing, bank statement automation, or similar finance workflows.
 
-Experience with AI-powered products or LLM integrations.
-Experience with cloud platforms such as AWS, Azure, or GCP.
-Familiarity with Docker and CI/CD.
-Experience with PostgreSQL or similar relational databases.
-Background in ML fundamentals or applied AI engineering.
-
-Hard requirements:
-
-Must be located in Norway and able to work onsite ~50%.
-Fluent Norwegian language skills.
-Minimum 5 years demonstrable software engineering experience.
-Proven experience with Python and backend development.
-Legal right to work in Norway.
+Role-specific sourcing requirements:
+- Candidates must demonstrate public evidence of Python-based automation or data-processing projects (GitHub, GitLab, public Gists, blog posts, technical portfolio).
+- Prefer candidates with code samples that parse/process CSV/Excel and call REST APIs or connect to ERPs.
+- UiPath Marketplace components, UiPath project repos or Power Automate portfolio are pluses but not required.
+- Prior work automating accounting tasks (invoices, reconciliations, payroll extracts) is a strong signal.
+- Must be based in Norway (remote work within Norway only).
 
 Candidate search keywords:
-
-Senior Software Engineer
-Senior Backend Engineer
-Python Developer
-Backend Developer
-Software Developer
-Product Engineer
+- "RPA Developer", "Automation Developer", "Automation Engineer", "Python Automation", "Finance Automation", "Back-office Automation", "Accounting Automation", "data automation", "pandas", "openpyxl", "requests", "Tripletex", "Visma", "Dynamics 365", "UiPath", "Power Automate", "Excel automation", "CSV processing"
 
 Candidate exclusion criteria:
+- No demonstrable experience with Python-based scripting or data-processing (CSV/Excel) projects.
+- No experience integrating with REST APIs or handling JSON in code.
+- Located outside Norway or unwilling to work fully remote from Norway.
+- Clearly senior (extensive enterprise architecture / management only) or clearly junior/intern-level with no real-world automation projects.
+- Public profile focused exclusively on unrelated domains (e.g., mobile UI design, computer graphics, academic ML research) with no automation/data-processing evidence.
 
-Less than 5 years relevant experience.
-Not fluent in Norwegian.
-Remote-only candidates unwilling to be onsite ~50% in Norway.
-No demonstrable Python or backend development experience.
-Candidates without right to work in Norway.
+Sourcing signals to prioritise:
+- GitHub/GitLab repos showing automation scripts, pandas usage, Excel/CSV pipelines, API clients or small ETL utilities.
+- UiPath/Power Automate public artifacts (Marketplace submissions, community forum activity) or LinkedIn job titles mentioning RPA/Automation.
+- Project write-ups, blog posts or technical notes that describe automating accounting tasks, invoice processing, bank statement parsing or ERP integrations.
+- Code quality indicators: clear README, usage examples, unit tests or modular scripts, commit history.
+- Demonstrable experience integrating with Tripletex/Visma/Dynamics or generic accounting APIs is a plus.
+
+Sourcing priority: prioritize candidates with public code that directly matches CSV/Excel + Python + API automation; secondarily those with UiPath/Power Automate experience and ERP connectors.

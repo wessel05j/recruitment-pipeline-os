@@ -33,7 +33,7 @@ GitHubCandidateSearcher
 GitHubCandidateSearcher requires:
 1. location: exactly one country or city string.
 2. required_languages: list of programming languages only.
-3. bio_keys: list of high-quality keywords likely to appear in serious GitHub bios.
+3. bio_keys: list of quality keywords likely to appear in serious GitHub bios.
 
 Rules:
 - Return valid JSON only.
@@ -44,8 +44,8 @@ Rules:
 - Do not return NOT_SUITABLE.
 - Use the best possible values from the job brief.
 - If something is imperfect, make the safest useful choice.
-- Prefer fewer high-quality bio_keys over many weak keys.
-- 5 strong bio_keys is better than 10 mediocre ones.
+- Prefer more bio keys.
+- Try to always get 10 proper bio keys.
 - bio_keys should be useful for finding candidates, not generic filler.
 - required_languages must only contain actual programming languages.
 - Do not include tools like OpenAI API, LangChain, Docker, AWS, React, PostgreSQL in required_languages.
