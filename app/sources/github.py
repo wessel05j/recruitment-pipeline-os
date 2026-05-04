@@ -19,6 +19,7 @@ class GitHubCandidateSearcher:
     LIMIT_PER_PAGE = 100
     MAX_SEARCH_PAGES_PER_LANGUAGE = 10  # GitHub max = 1000 search results
     MAX_CANDIDATES = 20
+    TOP_STARRED_REPOS_LIMIT = 10
     REQUIRE_EMAIL = False
     REQUIRE_FULL_NAME = True
 
@@ -180,6 +181,10 @@ class GitHubCandidateSearcher:
         profile["matched_languages"] = sorted(language_counts.keys())
         profile["language_counts"] = language_counts
         profile["latest_repo_push"] = self._latest_repo_push(repos)
+        profile["top_starred_repos"] = self._top_starred_repos(
+            repos=repos,
+            limit=self.TOP_STARRED_REPOS_LIMIT,
+        )
 
         return profile
 
@@ -213,6 +218,35 @@ class GitHubCandidateSearcher:
                 "direction": "desc",
             },
         )
+
+    def _top_starred_repos(
+        self,
+        repos: List[Dict[str, Any]],
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        sorted_repos = sorted(
+            repos,
+            key=lambda repo: repo.get("stargazers_count", 0),
+            reverse=True,
+        )
+
+        top_repos = []
+
+        for repo in sorted_repos[:limit]:
+            top_repos.append(
+                {
+                    "name": repo.get("name"),
+                    "description": repo.get("description"),
+                    "stars": repo.get("stargazers_count"),
+                    "forks": repo.get("forks_count"),
+                    "language": repo.get("language"),
+                    "url": repo.get("html_url"),
+                    "updated_at": repo.get("updated_at"),
+                    "pushed_at": repo.get("pushed_at"),
+                }
+            )
+
+        return top_repos
 
     def _count_repo_languages(self, repos: List[Dict[str, Any]]) -> Dict[str, int]:
         counts: Dict[str, int] = {}
