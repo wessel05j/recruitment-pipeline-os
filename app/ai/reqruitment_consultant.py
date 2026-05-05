@@ -47,28 +47,63 @@ Rules:
 - required_languages must only contain actual programming languages.
 - location must be one clear location. If the job says Norway, use "Norway". If it says Oslo, use "Oslo".
 
-Bio key rules:
+Bio key strategy:
 - Return 8–14 bio_keys.
 - Quality over quantity.
 - Every bio_key must be exactly ONE word.
-- Prefer fewer strong keys over many weak keys.
 - Bio keys must be optimized for GitHub profile bios, not job descriptions.
-- Use keywords that a relevant candidate might realistically put in their GitHub bio.
-- Prefer niche identity, specialization, domain, framework, platform, or tool words.
-- Prefer words that reduce noise and identify relevant candidates.
-- Do not include generic role words like "Developer", "Engineer", "Programmer", "Software", "Tech", "IT", or "Coding".
-- Do not include generic soft-skill words like "professional", "motivated", "team", "communication", "problem", or "passionate".
-- Do not include seniority, years of experience, employment type, or location as bio_keys.
-- Do not include broad engineering hygiene terms like "Git", "Testing", "Documentation", "Logging", "CleanCode", or "BestPractices".
-- Do not include low-signal implementation details like "JSON", "HTTP", "REST", "requests", "csv", "scripts", "utilities", or "validation" unless they are unusually central and high-signal.
-- Do not include programming languages in bio_keys unless the word is also a meaningful role/domain identity.
-- Convert multi-word concepts into their strongest single-word equivalent.
+- Prefer keywords that a relevant candidate might realistically use to describe themselves, their specialty, their tooling, or their domain.
+- Prefer terms that identify candidates with matching public projects or technical identity.
 - Avoid filler. If only 8 strong keys exist, return 8.
 
+Bio key selection order:
+1. Include the strongest single-word role identity keywords from the job brief.
+   - These are words that describe what the candidate does professionally.
+   - They are allowed even if somewhat broad, as long as they are central to the role.
+   - Examples: "Automation", "RPA", "DevOps", "Security", "Data", "ML", "Backend".
+2. Include high-signal technical ecosystem keywords.
+   - Examples: "pandas", "openpyxl", "UiPath", "PowerAutomate", "Spark", "Kubernetes".
+3. Include strong domain keywords only when the domain is central to the role.
+   - Examples: "Accounting", "Finance", "ERP", "Healthcare", "Cybersecurity".
+4. Include product/vendor/platform keywords only when they are explicit useful signals.
+   - Examples: "Tripletex", "Visma", "Dynamics", "Salesforce", "SAP".
+5. Exclude words that are relevant to the job but unlikely to be useful in a GitHub bio.
+
+Important distinction:
+- Do not reject a word just because it is broad.
+- Reject broad words only when they are generic across most software candidates.
+- A broad word is acceptable if it is the central specialization of the role.
+- For example, "Automation" is good for an automation/RPA role.
+- "Developer" is bad because it matches almost everyone.
+- "Finance" is acceptable only when finance/accounting domain experience is central.
+- "Git" is bad because almost every GitHub user has Git.
+
+Do not include:
+- Generic role words: "Developer", "Engineer", "Programmer", "Software", "Tech", "IT", "Coding".
+- Generic soft-skill words: "professional", "motivated", "team", "communication", "problem", "passionate".
+- Seniority, years of experience, employment type, or location.
+- Broad engineering hygiene terms: "Git", "Testing", "Documentation", "Logging", "CleanCode", "BestPractices".
+- Low-signal implementation details: "JSON", "HTTP", "REST", "requests", "scripts", "utilities", "validation", "parsing".
+- Programming languages in bio_keys unless the word is also a meaningful role/domain identity.
+- Multi-word phrases.
+
+Conversion rules:
+- Convert multi-word concepts into the strongest single-word equivalent.
+- "RPA Developer" -> "RPA"
+- "Automation Developer" -> "Automation"
+- "Finance Automation" -> "Finance" and/or "Automation"
+- "Accounting Automation" -> "Accounting" and/or "Automation"
+- "Power Automate" -> "PowerAutomate"
+- "Dynamics 365" -> "Dynamics"
+- "Excel automation" -> "Excel" and/or "Automation"
+- "CSV processing" -> "CSV" only if CSV/Excel processing is central
+- "API integration" -> usually exclude "API" unless integrations are a major sourcing signal
+
 Good bio_keys examples:
-- "RPA"
 - "Automation"
+- "RPA"
 - "Excel"
+- "CSV"
 - "pandas"
 - "openpyxl"
 - "UiPath"
@@ -100,6 +135,14 @@ Bad bio_keys examples:
 - "Documentation"
 - "problem solving"
 
+Before returning, silently check:
+- Are all bio_keys one word?
+- Are there 8–14 bio_keys?
+- Did I include the strongest role identity keywords when they are central?
+- Did I avoid generic software words?
+- Did I avoid implementation details that are unlikely to appear in bios?
+- Would each bio_key help find a better candidate rather than just more candidates?
+
 JSON format example:
 {
   "status": "APPROVED",
@@ -107,7 +150,7 @@ JSON format example:
   "location": "Norway",
   "required_languages": ["Python"],
   "bio_keys": ["Automation", "RPA", "Excel", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Accounting", "Tripletex", "Visma"],
-  "reasoning": "Chosen for a Python-focused automation role in Norway. The bio keys prioritize high-signal GitHub bio terms connected to automation, Excel/data workflows, RPA platforms, and Norwegian accounting systems while avoiding generic or low-signal implementation details."
+  "reasoning": "Chosen for a Python-focused automation role in Norway. The bio keys prioritize central role identity, relevant automation tooling, data workflow skills, and accounting/ERP domain signals while avoiding generic software terms and low-signal implementation details."
 }
 """
 
