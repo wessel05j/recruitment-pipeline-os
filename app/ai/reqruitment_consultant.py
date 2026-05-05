@@ -33,7 +33,7 @@ GitHubCandidateSearcher
 GitHubCandidateSearcher requires:
 1. location: exactly one country or city string.
 2. required_languages: list of programming languages only.
-3. bio_keys: list of quality keywords likely to appear in serious GitHub bios.
+3. bio_keys: list of high-signal single-word keywords likely to appear in serious GitHub bios.
 
 Rules:
 - Return valid JSON only.
@@ -44,35 +44,53 @@ Rules:
 - Do not return NOT_SUITABLE.
 - Use the best possible values from the job brief.
 - If something is imperfect, make the safest useful choice.
-- Prefer more bio keys.
-- Try to always get 10 proper bio keys.
-- bio_keys should be useful for finding candidates, not generic filler.
 - required_languages must only contain actual programming languages.
 - Do not include tools like OpenAI API, LangChain, Docker, AWS, React, PostgreSQL in required_languages.
-- Put important tools/frameworks/concepts in bio_keys if useful.
-- Do not put programming languages in bio_keys unless they are also a role identity.
 - location must be one clear location. If the job says Norway, use "Norway". If it says Oslo, use "Oslo".
 
+Bio key rules:
+- Always return 10–20 bio_keys.
+- Every bio_key must be exactly ONE word.
+- Prefer short, searchable, high-signal keywords.
+- Bio keys must be relevant to the role, domain, tools, or specialization.
+- Do not use generic role words like "Developer", "Engineer", "Programmer", "Software", "Tech", or "IT".
+- Do not use generic soft-skill words like "professional", "motivated", "team", "communication", or "problem".
+- Do not use location, seniority, years of experience, or employment type as bio_keys.
+- Do not include programming languages in bio_keys unless the word is also a meaningful role/domain identity.
+- Convert multi-word concepts into their strongest single-word equivalents.
+- Prefer keywords that reduce noise and help find niche candidates.
+
 Good bio_keys examples:
-- "LLM"
-- "OpenAI"
-- "Prompt Engineering"
-- "AI Engineer"
-- "Machine Learning"
-- "Cybersecurity"
-- "Backend"
-- "Data Science"
-- "Full Stack"
+- "RPA"
+- "Automation"
+- "Finance"
+- "Accounting"
+- "Excel"
+- "CSV"
+- "pandas"
+- "openpyxl"
+- "UiPath"
+- "PowerAutomate"
+- "ETL"
+- "Scripting"
+- "Reporting"
+- "Invoices"
+- "Reconciliation"
+- "Workflows"
 
 Bad bio_keys examples:
-- "professional"
-- "motivated"
-- "team player"
-- "communication"
-- "problem solving"
-- "5 years"
+- "Automation Developer"
+- "Finance Automation"
+- "Accounting Automation"
+- "Software Engineer"
+- "Developer"
+- "Engineer"
+- "Python"
 - "Norway"
-- "onsite"
+- "remote"
+- "junior"
+- "motivated"
+- "problem solving"
 
 JSON format example:
 {
@@ -80,8 +98,8 @@ JSON format example:
   "source": "github",
   "location": "Norway",
   "required_languages": ["Python"],
-  "bio_keys": ["LLM", "OpenAI", "Prompt Engineering", "AI Engineer", "Machine Learning"],
-  "reasoning": "Short explanation of why these search parameters were chosen."
+  "bio_keys": ["RPA", "Automation", "Finance", "Accounting", "Excel", "CSV", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Scripting", "Reporting", "Invoices", "Reconciliation"],
+  "reasoning": "Chosen for a Python-focused RPA role in Norway supporting finance and accounting automation. The bio keys are single-word, high-signal terms related to automation, finance workflows, and relevant tooling."
 }
 """
 
