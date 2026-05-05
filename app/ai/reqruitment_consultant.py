@@ -45,38 +45,41 @@ Rules:
 - Use the best possible values from the job brief.
 - If something is imperfect, make the safest useful choice.
 - required_languages must only contain actual programming languages.
-- Do not include tools like OpenAI API, LangChain, Docker, AWS, React, PostgreSQL in required_languages.
 - location must be one clear location. If the job says Norway, use "Norway". If it says Oslo, use "Oslo".
 
 Bio key rules:
-- Always return 10–20 bio_keys.
+- Return 8–14 bio_keys.
+- Quality over quantity.
 - Every bio_key must be exactly ONE word.
-- Prefer short, searchable, high-signal keywords.
-- Bio keys must be relevant to the role, domain, tools, or specialization.
-- Do not use generic role words like "Developer", "Engineer", "Programmer", "Software", "Tech", or "IT".
-- Do not use generic soft-skill words like "professional", "motivated", "team", "communication", or "problem".
-- Do not use location, seniority, years of experience, or employment type as bio_keys.
+- Prefer fewer strong keys over many weak keys.
+- Bio keys must be optimized for GitHub profile bios, not job descriptions.
+- Use keywords that a relevant candidate might realistically put in their GitHub bio.
+- Prefer niche identity, specialization, domain, framework, platform, or tool words.
+- Prefer words that reduce noise and identify relevant candidates.
+- Do not include generic role words like "Developer", "Engineer", "Programmer", "Software", "Tech", "IT", or "Coding".
+- Do not include generic soft-skill words like "professional", "motivated", "team", "communication", "problem", or "passionate".
+- Do not include seniority, years of experience, employment type, or location as bio_keys.
+- Do not include broad engineering hygiene terms like "Git", "Testing", "Documentation", "Logging", "CleanCode", or "BestPractices".
+- Do not include low-signal implementation details like "JSON", "HTTP", "REST", "requests", "csv", "scripts", "utilities", or "validation" unless they are unusually central and high-signal.
 - Do not include programming languages in bio_keys unless the word is also a meaningful role/domain identity.
-- Convert multi-word concepts into their strongest single-word equivalents.
-- Prefer keywords that reduce noise and help find niche candidates.
+- Convert multi-word concepts into their strongest single-word equivalent.
+- Avoid filler. If only 8 strong keys exist, return 8.
 
 Good bio_keys examples:
 - "RPA"
 - "Automation"
-- "Finance"
-- "Accounting"
 - "Excel"
-- "CSV"
 - "pandas"
 - "openpyxl"
 - "UiPath"
 - "PowerAutomate"
 - "ETL"
-- "Scripting"
-- "Reporting"
-- "Invoices"
-- "Reconciliation"
-- "Workflows"
+- "Accounting"
+- "Finance"
+- "ERP"
+- "Tripletex"
+- "Visma"
+- "Dynamics"
 
 Bad bio_keys examples:
 - "Automation Developer"
@@ -87,9 +90,14 @@ Bad bio_keys examples:
 - "Engineer"
 - "Python"
 - "Norway"
-- "remote"
-- "junior"
-- "motivated"
+- "Remote"
+- "Junior"
+- "Git"
+- "Testing"
+- "requests"
+- "JSON"
+- "HTTP"
+- "Documentation"
 - "problem solving"
 
 JSON format example:
@@ -98,8 +106,8 @@ JSON format example:
   "source": "github",
   "location": "Norway",
   "required_languages": ["Python"],
-  "bio_keys": ["RPA", "Automation", "Finance", "Accounting", "Excel", "CSV", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Scripting", "Reporting", "Invoices", "Reconciliation"],
-  "reasoning": "Chosen for a Python-focused RPA role in Norway supporting finance and accounting automation. The bio keys are single-word, high-signal terms related to automation, finance workflows, and relevant tooling."
+  "bio_keys": ["Automation", "RPA", "Excel", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Accounting", "Tripletex", "Visma"],
+  "reasoning": "Chosen for a Python-focused automation role in Norway. The bio keys prioritize high-signal GitHub bio terms connected to automation, Excel/data workflows, RPA platforms, and Norwegian accounting systems while avoiding generic or low-signal implementation details."
 }
 """
 
@@ -174,5 +182,5 @@ JSON format example:
         if not all(isinstance(key, str) and key.strip() for key in data["bio_keys"]):
             raise ValueError("Each bio key must be a non-empty string.")
 
-        if len(data["bio_keys"]) > 10:
+        if len(data["bio_keys"]) > 20:
             raise ValueError("bio_keys should not contain more than 10 items.")
