@@ -75,4 +75,4 @@ Temporary pipeline files under `app/temp/` are cleaned after a successful run.
 
 ### Pipeline
 
-<img width="1672" height="941" alt="Recruitment Agency Pipeline" src="https://github.com/user-attachments/assets/ec9ccb49-74f8-45ed-b586-451c2532d201" />
+<img width="1672" height="941" alt="ChatGPT Image 9  mai 2026, 10_45_43" src="https://github.com/user-attachments/assets/5accc2c5-85ca-4218-9de9-964aa5e765e6" />
