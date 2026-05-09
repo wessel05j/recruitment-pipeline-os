@@ -7,6 +7,7 @@ from app.ai.reqruitment_consultant import RecruitmentConsultant
 from app.sources.github_search import GitHubCandidateSearchRunner
 from app.ai.candidate_review import CandidateReviewPanel
 from app.ai.admin_review import AdminCandidateReview
+from app.ai.candidate_format_builder import CandidateFormatBuilder
 
 
 def init():
@@ -130,6 +131,19 @@ def main():
         output_path = admin.run()
         
         print(f"Done: {output_path}")
+
+
+        ###########################################################
+        # Candidate Format Builder - report-ready candidate sections
+        ###########################################################
+        print("\n=== Candidate Format Builder ===")
+        report_sections_path = "app/temp/candidate_report_sections.json"
+        if os.path.exists(report_sections_path):
+            print(f"Candidate report sections already exist at {report_sections_path}. Skipping Candidate Format Builder.")
+        else:
+            formatter = CandidateFormatBuilder()
+            output_path = formatter.run()
+            print(f"Done: {output_path}")
 
 
         ###########################################################
