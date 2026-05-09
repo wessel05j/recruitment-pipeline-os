@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -92,12 +93,99 @@ Return valid JSON only:
             if admin_result.get("admin_decision") == "YES":
                 passed_candidates.append(review)
 
+        ranked_candidates = self._rank_passed_candidates(passed_candidates)
+
         output = {
-            "passed_count": len(passed_candidates),
-            "candidates": passed_candidates,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "passed_count": len(ranked_candidates),
+            "candidates": ranked_candidates,
         }
 
         return self._save_output(output)
+
+    def _rank_passed_candidates(
+        self,
+        candidate_reviews: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        sorted_reviews = sorted(
+            candidate_reviews,
+            key=self._candidate_score,
+            reverse=True,
+        )
+
+        return [
+            self._build_ranked_candidate(rank=index, review=review)
+            for index, review in enumerate(sorted_reviews, start=1)
+        ]
+
+    def _candidate_score(self, review: Dict[str, Any]) -> int:
+        score = review.get("decision", {}).get("final_score", 0)
+
+        if isinstance(score, int):
+            return score
+
+        try:
+            return int(score)
+        except (TypeError, ValueError):
+            return 0
+
+    def _build_ranked_candidate(
+        self,
+        rank: int,
+        review: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        candidate = review.get("candidate", {})
+        decision = review.get("decision", {})
+        admin_review = review.get("admin_review", {})
+
+        return {
+            "rank": rank,
+            "candidate": self._candidate_summary(candidate),
+            "assessment": self._assessment_summary(decision),
+            "admin_review": {
+                "admin_decision": admin_review.get("admin_decision"),
+                "reasoning": admin_review.get("reasoning"),
+                "serious_red_flags": admin_review.get("serious_red_flags", []),
+            },
+        }
+
+    def _candidate_summary(self, candidate: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "name": candidate.get("name"),
+            "username": candidate.get("username"),
+            "bio": candidate.get("bio"),
+            "company": candidate.get("company"),
+            "location": candidate.get("location"),
+            "blog_url": candidate.get("blog_url"),
+            "email": candidate.get("email"),
+            "twitter_username": candidate.get("twitter_username"),
+            "repo_count": candidate.get("repo_count"),
+            "followers": candidate.get("followers"),
+            "following": candidate.get("following"),
+            "account_created": candidate.get("account_created"),
+            "last_profile_update": candidate.get("last_profile_update"),
+            "github_profile_url": candidate.get("github_profile_url"),
+            "avatar_url": candidate.get("avatar_url"),
+            "matched_languages": candidate.get("matched_languages", []),
+            "language_counts": candidate.get("language_counts", {}),
+            "latest_repo_push": candidate.get("latest_repo_push"),
+            "signal_keys": candidate.get("signal_keys", []),
+            "signal_matches": candidate.get("signal_matches", []),
+            "top_starred_repos": candidate.get("top_starred_repos", []),
+        }
+
+    def _assessment_summary(self, decision: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "final_score": decision.get("final_score"),
+            "recommendation": decision.get("recommendation"),
+            "summary": decision.get("summary"),
+            "key_strengths": decision.get("key_strengths", []),
+            "key_concerns": decision.get("key_concerns", []),
+            "contactability_score": decision.get("contactability_score"),
+            "contactability_label": decision.get("contactability_label"),
+            "contactability_reason": decision.get("contactability_reason"),
+            "contact_routes": decision.get("contact_routes", []),
+        }
 
     def _review_single_candidate(
         self,
