@@ -42,6 +42,15 @@ class GitHubCandidateSearchRunner:
                     "required_languages": self.required_languages,
                     "signal_keys": self.signal_keys,
                     "funnel_metrics": funnel_metrics,
+                    "selection": {
+                        "method": "broad_search_then_source_fit_rank",
+                        "max_candidates": GitHubCandidateSearcher.MAX_CANDIDATES,
+                        "notes": [
+                            "GitHub user search is filtered by location, required language, minimum repositories, and minimum followers.",
+                            "Followers and repository stars are metadata only; they are not used as primary source ranking inputs.",
+                            "Saved candidates are the highest source_fit_score candidates from the collected pool.",
+                        ],
+                    },
                     "candidate_count": len(candidates),
                     "candidates": candidates,
                 },

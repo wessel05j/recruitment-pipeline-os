@@ -48,7 +48,7 @@ def cleanup_temp_files() -> None:
 
 
 def get_review_candidate_limit() -> Optional[int]:
-    raw_limit = os.getenv("REVIEW_CANDIDATE_LIMIT", "5").strip().lower()
+    raw_limit = os.getenv("REVIEW_CANDIDATE_LIMIT", "all").strip().lower()
 
     if raw_limit in {"all", "none", "unlimited"}:
         return None

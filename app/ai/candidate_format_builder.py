@@ -33,6 +33,8 @@ Important:
 - Missing company should be written as "Not listed".
 - Missing website/social routes should be written naturally as missing contact routes.
 - Use GitHub evidence: languages, signal matches, latest activity, followers, repo count, and top repositories.
+- Prefer top_relevant_repos over top_starred_repos when choosing notable repositories.
+- Treat source_fit_score as source-stage evidence, not the final candidate score.
 - Keep text client-ready, concise, and factual.
 - technical_fit_summary must be 40-70 words.
 - why_selected must contain at most 2 bullets.
@@ -273,11 +275,13 @@ Return valid JSON only:
     def _github_evidence(self, candidate: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "matched_languages": candidate.get("matched_languages", []),
+            "source_fit_score": candidate.get("source_fit_score"),
+            "source_fit_reasons": candidate.get("source_fit_reasons", []),
             "signal_matches": self._signal_match_lines(
                 candidate.get("signal_matches", [])
             ),
             "notable_repositories": self._notable_repositories(
-                candidate.get("top_starred_repos", [])
+                candidate.get("top_relevant_repos") or candidate.get("top_starred_repos", [])
             ),
         }
 

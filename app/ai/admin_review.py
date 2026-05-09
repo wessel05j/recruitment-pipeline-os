@@ -171,6 +171,11 @@ Return valid JSON only:
             "latest_repo_push": candidate.get("latest_repo_push"),
             "signal_keys": candidate.get("signal_keys", []),
             "signal_matches": candidate.get("signal_matches", []),
+            "signal_match_count": candidate.get("signal_match_count"),
+            "source_fit_score": candidate.get("source_fit_score"),
+            "source_fit_breakdown": candidate.get("source_fit_breakdown", {}),
+            "source_fit_reasons": candidate.get("source_fit_reasons", []),
+            "top_relevant_repos": candidate.get("top_relevant_repos", []),
             "top_starred_repos": candidate.get("top_starred_repos", []),
         }
 

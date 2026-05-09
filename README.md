@@ -57,10 +57,12 @@ Add your keys:
 ```bash
 GITHUB_TOKEN=your_token_here
 OPENAI_API_KEY=your_token_here
-REVIEW_CANDIDATE_LIMIT=5
+REVIEW_CANDIDATE_LIMIT=all
 ```
 
-`REVIEW_CANDIDATE_LIMIT` controls how many saved candidates are reviewed with AI. Use a positive number such as `5`, or `all` to review every saved candidate.
+`REVIEW_CANDIDATE_LIMIT` controls how many saved candidates are reviewed with AI. The V1 default is `all`, because sourcing already keeps the top 20 candidates after local source-fit ranking. Use a positive number such as `5` when you want a cheaper test run.
+
+GitHub sourcing collects a broad pool by location, required language, minimum repositories, and minimum followers. It then ranks candidates locally by source-fit evidence such as signal-key matches in bios and repository metadata. Followers and stars are kept as metadata, not the main ranking logic.
 
 ## 4. Run project
 

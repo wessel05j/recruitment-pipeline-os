@@ -255,6 +255,13 @@ class ShortlistPDFGenerator:
 
         data = [
             [
+                Paragraph("Source fit", styles["table_label"]),
+                Paragraph(
+                    self._text(evidence.get("source_fit_score", "Not listed")),
+                    styles["table_value"],
+                ),
+            ],
+            [
                 Paragraph("Languages", styles["table_label"]),
                 Paragraph(", ".join(evidence.get("matched_languages", [])) or "Not listed", styles["table_value"]),
             ],

@@ -14,7 +14,7 @@ load_dotenv()
 class GitHubCandidateSearcher:
     BASE_URL = "https://api.github.com"
 
-    MIN_REPOS = 5
+    MIN_REPOS = 2
     MIN_FOLLOWERS = 2
     RECENT_ACTIVITY_DAYS = 90
     LIMIT_PER_PAGE = 100
@@ -61,17 +61,10 @@ class GitHubCandidateSearcher:
 
         self.funnel_metrics = Counter()
         signal_keys = signal_keys or []
-        results: List[Dict[str, Any]] = []
+        candidate_pool: List[Dict[str, Any]] = []
         checked_usernames: Set[str] = set()
 
-        language_count = max(1, len(required_languages))
-        per_language_quota = max(1, self.MAX_CANDIDATES // language_count)
-        extra_slots = self.MAX_CANDIDATES - (per_language_quota * language_count)
-
-        for index, language in enumerate(required_languages):
-            language_quota = per_language_quota + (1 if index < extra_slots else 0)
-            language_added = 0
-
+        for language in required_languages:
             for page in range(1, self.MAX_SEARCH_PAGES_PER_LANGUAGE + 1):
                 users = self._search_user_page(
                     location=location,
@@ -85,12 +78,6 @@ class GitHubCandidateSearcher:
                     break
 
                 for user in users:
-                    if len(results) >= self.MAX_CANDIDATES:
-                        return results
-
-                    if language_added >= language_quota:
-                        break
-
                     username = user.get("login")
 
                     if not username:
@@ -109,19 +96,22 @@ class GitHubCandidateSearcher:
 
                     candidate = self._process_candidate(
                         username=username,
+                        location=location,
                         required_languages=required_languages,
                         signal_keys=signal_keys,
                     )
 
                     if candidate:
-                        results.append(candidate)
-                        language_added += 1
-                        self.funnel_metrics["accepted_candidates"] += 1
+                        candidate_pool.append(candidate)
+                        self.funnel_metrics["candidate_pool_candidates"] += 1
 
-                if language_added >= language_quota:
-                    break
-
-        return results
+        ranked_candidates = self._rank_candidates(candidate_pool)
+        self.funnel_metrics["ranked_candidate_pool"] = len(ranked_candidates)
+        self.funnel_metrics["returned_candidates"] = min(
+            len(ranked_candidates),
+            self.MAX_CANDIDATES,
+        )
+        return ranked_candidates[: self.MAX_CANDIDATES]
 
     def _validate_search_input(
         self,
@@ -155,7 +145,7 @@ class GitHubCandidateSearcher:
             [
                 f"location:{self._format_search_value(location)}",
                 f"language:{self._format_search_value(language)}",
-                f"repos:>{self.MIN_REPOS}",
+                f"repos:>={self.MIN_REPOS}",
                 f"followers:>={self.MIN_FOLLOWERS}",
             ]
         )
@@ -166,8 +156,6 @@ class GitHubCandidateSearcher:
                 "q": query,
                 "per_page": self.LIMIT_PER_PAGE,
                 "page": page,
-                "sort": "followers",
-                "order": "desc",
             },
         )
 
@@ -176,6 +164,7 @@ class GitHubCandidateSearcher:
     def _process_candidate(
         self,
         username: str,
+        location: str,
         required_languages: List[str],
         signal_keys: List[str],
     ) -> Optional[Dict[str, Any]]:
@@ -183,11 +172,10 @@ class GitHubCandidateSearcher:
 
         repos = self._fetch_user_repos(username)
 
-        if not self._has_recent_repo_activity(repos):
-            self.funnel_metrics["failed_recent_activity"] += 1
+        if not repos:
+            self.funnel_metrics["failed_no_repositories"] += 1
             return None
 
-        self.funnel_metrics["passed_recent_activity"] += 1
         language_counts = self._count_repo_languages(repos)
 
         if not self._has_all_required_languages(language_counts, required_languages):
@@ -212,17 +200,49 @@ class GitHubCandidateSearcher:
             self.funnel_metrics[f"failed_{failure_reason}"] += 1
             return None
 
+        self.funnel_metrics["passed_signal_keys"] += 1
+        source_fit = self._source_fit(
+            profile=profile,
+            repos=repos,
+            location=location,
+            required_languages=required_languages,
+            signal_matches=signal_matches,
+        )
+
         profile["matched_languages"] = sorted(language_counts.keys())
         profile["language_counts"] = language_counts
         profile["latest_repo_push"] = self._latest_repo_push(repos)
         profile["signal_keys"] = signal_keys
         profile["signal_matches"] = signal_matches
+        profile["signal_match_count"] = len(signal_matches)
+        profile["source_fit_score"] = source_fit["score"]
+        profile["source_fit_breakdown"] = source_fit["breakdown"]
+        profile["source_fit_reasons"] = source_fit["reasons"]
+        profile["top_relevant_repos"] = self._top_relevant_repos(
+            repos=repos,
+            signal_matches=signal_matches,
+            limit=5,
+        )
         profile["top_starred_repos"] = self._top_starred_repos(
             repos=repos,
             limit=self.TOP_STARRED_REPOS_LIMIT,
         )
 
         return profile
+
+    def _rank_candidates(
+        self,
+        candidates: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        return sorted(
+            candidates,
+            key=lambda candidate: (
+                candidate.get("source_fit_score", 0),
+                candidate.get("signal_match_count", 0),
+                candidate.get("latest_repo_push") or "",
+            ),
+            reverse=True,
+        )
 
     def get_funnel_metrics(self) -> Dict[str, int]:
         return dict(self.funnel_metrics)
@@ -295,6 +315,64 @@ class GitHubCandidateSearcher:
 
         return top_repos
 
+    def _top_relevant_repos(
+        self,
+        repos: List[Dict[str, Any]],
+        signal_matches: List[Dict[str, Any]],
+        limit: int = 5,
+    ) -> List[Dict[str, Any]]:
+        match_index: Dict[str, Dict[str, Set[str]]] = {}
+
+        for match in signal_matches:
+            key = match.get("key")
+            if not key:
+                continue
+
+            for repo_hit in match.get("repositories", []):
+                repo_name = repo_hit.get("name")
+                if not repo_name:
+                    continue
+
+                entry = match_index.setdefault(
+                    repo_name,
+                    {"keys": set(), "fields": set()},
+                )
+                entry["keys"].add(key)
+                entry["fields"].update(repo_hit.get("matched_fields", []))
+
+        relevant_repos = []
+
+        for repo in repos:
+            repo_name = repo.get("name")
+            if repo_name not in match_index:
+                continue
+
+            matched = match_index[repo_name]
+            relevant_repos.append(
+                {
+                    "name": repo.get("name"),
+                    "description": repo.get("description"),
+                    "stars": repo.get("stargazers_count"),
+                    "forks": repo.get("forks_count"),
+                    "language": repo.get("language"),
+                    "url": repo.get("html_url"),
+                    "updated_at": repo.get("updated_at"),
+                    "pushed_at": repo.get("pushed_at"),
+                    "matched_signal_keys": sorted(matched["keys"]),
+                    "matched_fields": sorted(matched["fields"]),
+                    "relevance_score": self._repo_relevance_score(repo, matched),
+                }
+            )
+
+        return sorted(
+            relevant_repos,
+            key=lambda repo: (
+                repo.get("relevance_score", 0),
+                repo.get("pushed_at") or "",
+            ),
+            reverse=True,
+        )[:limit]
+
     def _count_repo_languages(self, repos: List[Dict[str, Any]]) -> Dict[str, int]:
         counts: Dict[str, int] = {}
 
@@ -336,6 +414,148 @@ class GitHubCandidateSearcher:
             return None
 
         return max(pushed_dates)
+
+    def _source_fit(
+        self,
+        profile: Dict[str, Any],
+        repos: List[Dict[str, Any]],
+        location: str,
+        required_languages: List[str],
+        signal_matches: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        signal_score = self._signal_score(signal_matches)
+        relevant_repo_count = self._relevant_repo_count(signal_matches)
+        repo_evidence_score = self._repo_evidence_score(relevant_repo_count)
+        recency_score = self._recency_score(self._latest_repo_push(repos))
+        location_score = self._location_score(profile.get("location"), location)
+
+        breakdown = {
+            "required_language": 30,
+            "signal_relevance": signal_score,
+            "repo_evidence": repo_evidence_score,
+            "recent_activity": recency_score,
+            "location": location_score,
+        }
+        score = min(100, sum(breakdown.values()))
+        reasons = [
+            f"Required language match: {', '.join(required_languages)}.",
+            f"Matched {len(signal_matches)} distinct signal keys.",
+            f"Found signal evidence in {relevant_repo_count} repositories.",
+        ]
+
+        latest_push = self._latest_repo_push(repos)
+        if latest_push:
+            reasons.append(f"Latest public repo push: {latest_push}.")
+
+        if location_score:
+            reasons.append(f"Profile location matched search location: {location}.")
+
+        return {
+            "score": score,
+            "breakdown": breakdown,
+            "reasons": reasons,
+        }
+
+    def _signal_score(self, signal_matches: List[Dict[str, Any]]) -> int:
+        field_weights = {
+            "repo_topics": 8,
+            "repo_name": 7,
+            "repo_description": 6,
+            "bio": 5,
+        }
+        score = 0
+
+        for match in signal_matches:
+            fields = match.get("matched_fields", [])
+            key_score = max((field_weights.get(field, 0) for field in fields), default=0)
+            repository_bonus = min(len(match.get("repositories", [])), 3)
+            score += key_score + repository_bonus
+
+        return min(score, 40)
+
+    def _relevant_repo_count(self, signal_matches: List[Dict[str, Any]]) -> int:
+        repo_names = set()
+
+        for match in signal_matches:
+            for repo in match.get("repositories", []):
+                if repo.get("name"):
+                    repo_names.add(repo["name"])
+
+        return len(repo_names)
+
+    def _repo_evidence_score(self, relevant_repo_count: int) -> int:
+        if relevant_repo_count >= 4:
+            return 15
+
+        if relevant_repo_count == 3:
+            return 12
+
+        if relevant_repo_count == 2:
+            return 9
+
+        if relevant_repo_count == 1:
+            return 5
+
+        return 0
+
+    def _recency_score(self, latest_push: Optional[str]) -> int:
+        if not latest_push:
+            return 0
+
+        latest_push_date = datetime.fromisoformat(latest_push.replace("Z", "+00:00"))
+        age_days = (datetime.now(timezone.utc) - latest_push_date).days
+
+        if age_days <= 30:
+            return 10
+
+        if age_days <= 90:
+            return 7
+
+        if age_days <= 180:
+            return 4
+
+        return 1
+
+    def _location_score(
+        self,
+        profile_location: Optional[str],
+        search_location: str,
+    ) -> int:
+        if not profile_location:
+            return 0
+
+        profile_location_lower = profile_location.lower()
+        search_terms = [
+            term.lower()
+            for term in re.split(r"[\s,]+", search_location)
+            if len(term.strip()) >= 3
+        ]
+
+        if any(term in profile_location_lower for term in search_terms):
+            return 5
+
+        return 0
+
+    def _repo_relevance_score(
+        self,
+        repo: Dict[str, Any],
+        matched: Dict[str, Set[str]],
+    ) -> int:
+        field_weights = {
+            "topics": 5,
+            "name": 4,
+            "description": 3,
+        }
+        score = len(matched["keys"]) * 3
+        score += sum(field_weights.get(field, 0) for field in matched["fields"])
+
+        if repo.get("description"):
+            score += 1
+
+        if repo.get("pushed_at"):
+            score += 1
+
+        return score
 
     def _profile_filter_failure(
         self,
