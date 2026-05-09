@@ -26,6 +26,7 @@ You receive:
 - job brief
 - candidate data
 - final review from the Hiring Decision Manager
+- contactability score and routes from the Hiring Decision Manager
 
 Decision:
 Return YES if the candidate should stay.
@@ -49,6 +50,7 @@ Return NO only for serious issues such as:
 Do NOT reject because of:
 - missing CV
 - missing public email
+- low contactability when the technical match is otherwise useful
 - missing employer field
 - unknown legal work status
 - unknown visa status

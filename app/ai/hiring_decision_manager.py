@@ -37,9 +37,17 @@ Only score based on visible technical and profile fit:
 - language counts
 - top starred repos
 - bio relevance
+- signal key matches from bio or repository metadata
 - recent activity
 - visible alignment with role keywords
 - strength of advocate/skeptic debate
+
+Contactability:
+- Separately score how easy it would be for a recruiter to contact the person.
+- Contactability must not reduce the technical final_score.
+- Use visible contact routes only: public email, website/blog, social username, company field, bio contact text, or GitHub profile.
+- Missing public email can lower contactability, but it is not a technical weakness.
+- If the only route is the GitHub profile, contactability is LOW, not a reason to reject.
 
 Scoring:
 - 90–100: Excellent GitHub-visible match.
@@ -68,6 +76,10 @@ Return valid JSON only:
   "candidate_username": "username",
   "final_score": <integer 0-100>,
   "recommendation": "STRONG_CONTACT | CONTACT | LOW_PRIORITY",
+  "contactability_score": <integer 0-100>,
+  "contactability_label": "HIGH | MEDIUM | LOW | NONE",
+  "contactability_reason": "Short contactability explanation.",
+  "contact_routes": ["route 1", "route 2"],
   "summary": "Short technical sourcing evaluation.",
   "key_strengths": ["strength 1", "strength 2"],
   "key_concerns": ["concern 1", "concern 2"]
@@ -91,5 +103,91 @@ Return valid JSON only:
 
         result = self.ai.run(json.dumps(payload, ensure_ascii=False, indent=2))
         data = json.loads(result["answer"])
+        self._ensure_contactability_fields(data, candidate)
         data["metadata"] = result["metadata"]
         return data
+
+    def _ensure_contactability_fields(
+        self,
+        data: Dict[str, Any],
+        candidate: Dict[str, Any],
+    ) -> None:
+        routes = data.get("contact_routes")
+
+        if not isinstance(routes, list):
+            routes = self._infer_contact_routes(candidate)
+            data["contact_routes"] = routes
+
+        if "contactability_score" not in data:
+            data["contactability_score"] = self._infer_contactability_score(routes, candidate)
+
+        if "contactability_label" not in data:
+            data["contactability_label"] = self._contactability_label(
+                data["contactability_score"]
+            )
+
+        if not data.get("contactability_reason"):
+            data["contactability_reason"] = self._contactability_reason(routes)
+
+    def _infer_contact_routes(self, candidate: Dict[str, Any]) -> list[str]:
+        routes = []
+
+        if candidate.get("email"):
+            routes.append("public email")
+
+        if candidate.get("blog_url"):
+            routes.append("website/blog")
+
+        if candidate.get("twitter_username"):
+            routes.append("social profile")
+
+        if candidate.get("company"):
+            routes.append("company field")
+
+        if candidate.get("github_profile_url"):
+            routes.append("GitHub profile")
+
+        return routes
+
+    def _infer_contactability_score(
+        self,
+        routes: list[str],
+        candidate: Dict[str, Any],
+    ) -> int:
+        if candidate.get("email"):
+            return 90
+
+        if candidate.get("blog_url") and candidate.get("twitter_username"):
+            return 75
+
+        if candidate.get("blog_url") or candidate.get("twitter_username"):
+            return 65
+
+        if candidate.get("company"):
+            return 45
+
+        if candidate.get("github_profile_url"):
+            return 30
+
+        if routes:
+            return 25
+
+        return 0
+
+    def _contactability_label(self, score: int) -> str:
+        if score >= 80:
+            return "HIGH"
+
+        if score >= 50:
+            return "MEDIUM"
+
+        if score > 0:
+            return "LOW"
+
+        return "NONE"
+
+    def _contactability_reason(self, routes: list[str]) -> str:
+        if routes:
+            return "Visible contact routes: " + ", ".join(routes) + "."
+
+        return "No visible contact route found in the candidate data."

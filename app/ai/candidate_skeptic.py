@@ -22,11 +22,17 @@ Good skeptic arguments:
 - Required language is weak compared to other languages.
 - Candidate profile seems more scripting/tooling than backend/product engineering.
 - Bio is not professional or does not align with the role.
+- Signal key matches are weak, shallow, or only loosely related to the job brief.
 - GitHub languages do not match the role well.
 - Candidate appears focused on a different technical area.
 - Location conflicts with the job brief.
 - Recent activity is weak if latest push is old.
 - Repo/activity pattern may not match the role.
+
+Signal key guidance:
+- Signal matches can come from the bio, repository names, repository descriptions, or repository topics.
+- Repository metadata is valid evidence, but be careful about strength. A keyword in one old or tiny repo is weaker than repeated matches across relevant repos.
+- Do not criticize a candidate only because the keyword was not in their bio if it appeared in meaningful repository metadata.
 
 Bad skeptic arguments:
 - Legal right to work is unknown.
@@ -34,6 +40,7 @@ Bad skeptic arguments:
 - No CV.
 - No employer listed.
 - No public email.
+- Low contactability.
 - No proof of production work.
 - No proof of 5 years professional experience.
 - Need HR screening.

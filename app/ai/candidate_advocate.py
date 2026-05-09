@@ -28,8 +28,15 @@ Use only:
 - matched languages
 - language counts
 - latest repo push
+- signal key matches from bio or repository metadata
+- top starred repositories, including names and descriptions
 - company/blog/social links if present
 - job brief requirements
+
+Signal key guidance:
+- Treat signal_matches as positive evidence when the key appears in the bio, repository name, repository description, or repository topics.
+- Repository metadata is valid sourcing evidence. Do not require the same keyword to appear in the bio.
+- Do not overstate a match. If a repository description only lightly suggests a skill, describe it as a signal, not proof of professional experience.
 
 Round behavior:
 - Round 1: Make the strongest positive case. Return argument + strengths + suggested_score.
