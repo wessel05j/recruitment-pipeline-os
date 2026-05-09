@@ -11,10 +11,37 @@ from app.ai.candidate_format_builder import CandidateFormatBuilder
 from app.reports.shortlist_pdf import ShortlistPDFGenerator
 
 
+PROJECT_NAME = "recruitment-pipeline-os"
+CREATOR = "Erich Johannes Wessel"
+REPOSITORY_URL = "https://github.com/wessel05j/recruitment-pipeline-os"
+
+
+def print_banner() -> None:
+    line = "=" * 72
+    print(line)
+    print(f"{PROJECT_NAME} - GitHub candidate sourcing pipeline")
+    print(f"Creator: {CREATOR}")
+    print(f"Repository: {REPOSITORY_URL}")
+    print(line)
+    print("V1 focus: finding developer and IT candidates from public GitHub data.\n")
+
+
+def print_section(title: str) -> None:
+    print(f"\n--- {title} ---")
+
+
+def print_skip(message: str) -> None:
+    print(f"[skip] {message}")
+
+
+def print_done(message: str) -> None:
+    print(f"[done] {message}")
+
+
 def init():
     load_dotenv()
 
-    print("Initializing the application...")
+    print("Checking environment...")
 
     required_env_vars = ["GITHUB_TOKEN", "OPENAI_API_KEY"]
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
@@ -24,19 +51,17 @@ def init():
             f"Missing environment variables: {', '.join(missing_vars)}"
         )
 
-    print("Environment configured successfully.")
+    print_done("Environment configured successfully.")
 
 
 def main():
     try:
-        print("Welcome to recruitment-pipeline-os!")
-        print("Creator: Erich Johannes Wessel")
-        print("Good luck on finding your next star employee!\n")
+        print_banner()
 
-        print("\n=== Account Manager ===")
+        print_section("Account Manager")
         job_brief_path = "app/temp/job_brief.txt"
         if os.path.exists(job_brief_path):
-            print(f"Job brief already exists at {job_brief_path}. Skipping Account Manager.")
+            print_skip(f"Job brief already exists at {job_brief_path}.")
         else:
             ###########################################################
             # Account Manager - Initial conversation with client
@@ -54,8 +79,8 @@ def main():
                 context_used = context.get("context_used_percent")
 
                 if result["status"] == "APPROVED":
-                    print("\nApproved. Job brief made")
-                    print(f"Saved to: {result['job_brief_path']}")
+                    print_done("Job brief approved and saved.")
+                    print(f"Path: {result['job_brief_path']}")
                     break
 
                 print("\n" + result["reply"])
@@ -72,17 +97,17 @@ def main():
         ###########################################################
         # Recruitment Consultant - Candidate sourcing
         ###########################################################
-        print("\n=== Recruitment Consultant ===")
+        print_section("Recruitment Consultant")
         search_params_path = "app/temp/github_search_params.json"
         if os.path.exists(search_params_path):
-            print(f"Search parameters already exist at {search_params_path}. Skipping Recruitment Consultant.")
+            print_skip(f"Search parameters already exist at {search_params_path}.")
         else:
             print("Converting job brief into search parameters")
             consultant = RecruitmentConsultant()
             result = consultant.run()
             print(result["status"])
             if result["status"] == "APPROVED":
-                print("Search parameters approved and saved.")
+                print_done("Search parameters approved and saved.")
             else:
                 print(result["message"])
 
@@ -90,61 +115,67 @@ def main():
         ###########################################################
         # Search Engine - GitHub search for candidates
         ###########################################################
-        print("\n=== GitHub Search ===")
+        print_section("GitHub Search")
         candidates_path = "app/temp/github_candidates.json"
         if os.path.exists(candidates_path):
-            print(f"Candidates already exist at {candidates_path}. Skipping GitHub search.")
+            print_skip(f"Candidates already exist at {candidates_path}.")
         else:
             print("Takes up to 30 minutes.")
             with open(search_params_path, "r", encoding="utf-8") as file:
                 search_params = json.load(file)
             location = search_params["location"]
             required_languages = search_params["required_languages"]
-            signal_keys = search_params.get("signal_keys", search_params.get("bio_keys", []))
+            signal_keys = search_params.get(
+                "signal_keys",
+                search_params.get("bio_keys", []),
+            )
             runner = GitHubCandidateSearchRunner(
                 location=location,
                 required_languages=required_languages,
                 signal_keys=signal_keys,
             )
-            runner.run()
+            output_path = runner.run()
+            print_done(f"GitHub candidates saved to {output_path}.")
 
 
         ###########################################################
         # Candidate review - Internal review of candidates
         ###########################################################
-        print("\n=== Candidate Review ===")
-        revew_path = "app/temp/candidate_reviews/"
-        if os.path.exists(revew_path):
-            print(f"Candidate review already exists at {revew_path}. Skipping Candidate Review.")
+        print_section("Candidate Review")
+        review_path = "app/temp/candidate_reviews/"
+        if os.path.exists(review_path):
+            print_skip(f"Candidate review already exists at {review_path}.")
         else:
             panel = CandidateReviewPanel(max_candidates=1)
             review_paths = panel.run()
             
             for path in review_paths:
-                print(f"Candidate review saved: {path}")
+                print_done(f"Candidate review saved: {path}")
 
 
         ###########################################################
         # Admin review - final review
         ###########################################################
-        print("\n=== Admin Review ===")
+        print_section("Admin Review")
         admin = AdminCandidateReview()
         output_path = admin.run()
         
-        print(f"Done: {output_path}")
+        print_done(f"Admin review saved to {output_path}.")
 
 
         ###########################################################
         # Candidate Format Builder - report-ready candidate sections
         ###########################################################
-        print("\n=== Candidate Format Builder ===")
+        print_section("Candidate Format Builder")
         report_sections_path = "app/temp/candidate_report_sections.json"
         if os.path.exists(report_sections_path):
-            print(f"Candidate report sections already exist at {report_sections_path}. Skipping Candidate Format Builder.")
+            print_skip(
+                f"Candidate report sections already exist at {report_sections_path}."
+            )
         else:
             formatter = CandidateFormatBuilder()
             output_path = formatter.run()
-            print(f"Done: {output_path}")
+            print_done(f"Candidate report sections saved to {output_path}.")
 
 
         ###########################################################
@@ -155,19 +186,24 @@ def main():
         ###########################################################
         # Export to PDF - Generate final report
         ###########################################################
-        print("\n=== PDF Report ===")
+        print_section("PDF Report")
         pdf_path = "app/output/github_candidate_shortlist.pdf"
         if os.path.exists(pdf_path):
-            print(f"PDF report already exists at {pdf_path}. Skipping PDF generation.")
+            print_skip(f"PDF report already exists at {pdf_path}.")
         else:
             pdf = ShortlistPDFGenerator()
             output_path = pdf.run()
-            print(f"Done: {output_path}")
+            print_done(f"PDF report saved to {output_path}.")
+
+        print_section("Pipeline Complete")
+        print_done("V1 pipeline finished.")
+        print(f"Final PDF: {pdf_path}")
+        print(f"Project: {REPOSITORY_URL}")
 
         
 
     except Exception as e:
-        print(f"Error in main loop: {e}")
+        print(f"[error] {e}")
         raise
 
 
