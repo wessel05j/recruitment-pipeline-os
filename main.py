@@ -8,6 +8,7 @@ from app.sources.github_search import GitHubCandidateSearchRunner
 from app.ai.candidate_review import CandidateReviewPanel
 from app.ai.admin_review import AdminCandidateReview
 from app.ai.candidate_format_builder import CandidateFormatBuilder
+from app.reports.shortlist_pdf import ShortlistPDFGenerator
 
 
 def init():
@@ -154,6 +155,14 @@ def main():
         ###########################################################
         # Export to PDF - Generate final report
         ###########################################################
+        print("\n=== PDF Report ===")
+        pdf_path = "app/output/github_candidate_shortlist.pdf"
+        if os.path.exists(pdf_path):
+            print(f"PDF report already exists at {pdf_path}. Skipping PDF generation.")
+        else:
+            pdf = ShortlistPDFGenerator()
+            output_path = pdf.run()
+            print(f"Done: {output_path}")
 
         
 
