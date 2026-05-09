@@ -45,9 +45,10 @@ Only score based on visible technical and profile fit:
 Contactability:
 - Separately score how easy it would be for a recruiter to contact the person.
 - Contactability must not reduce the technical final_score.
-- Use visible contact routes only: public email, website/blog, social username, company field, bio contact text, or GitHub profile.
+- Use direct visible contact routes only: public email, email/contact text in bio, website/blog, or social username.
+- Company field and GitHub profile are research clues, not direct contact routes.
 - Missing public email can lower contactability, but it is not a technical weakness.
-- If the only route is the GitHub profile, contactability is LOW, not a reason to reject.
+- If the only visible information is the GitHub profile or employer/company field, contactability is LOW, not MEDIUM.
 
 Scoring:
 - 90–100: Excellent GitHub-visible match.
@@ -80,6 +81,7 @@ Return valid JSON only:
   "contactability_label": "HIGH | MEDIUM | LOW | NONE",
   "contactability_reason": "Short contactability explanation.",
   "contact_routes": ["route 1", "route 2"],
+  "contact_research_clues": ["clue 1", "clue 2"],
   "summary": "Short technical sourcing evaluation.",
   "key_strengths": ["strength 1", "strength 2"],
   "key_concerns": ["concern 1", "concern 2"]
@@ -112,22 +114,15 @@ Return valid JSON only:
         data: Dict[str, Any],
         candidate: Dict[str, Any],
     ) -> None:
-        routes = data.get("contact_routes")
+        routes = self._infer_contact_routes(candidate)
+        clues = self._infer_contact_research_clues(candidate)
+        score = self._infer_contactability_score(routes, clues, candidate)
 
-        if not isinstance(routes, list):
-            routes = self._infer_contact_routes(candidate)
-            data["contact_routes"] = routes
-
-        if "contactability_score" not in data:
-            data["contactability_score"] = self._infer_contactability_score(routes, candidate)
-
-        if "contactability_label" not in data:
-            data["contactability_label"] = self._contactability_label(
-                data["contactability_score"]
-            )
-
-        if not data.get("contactability_reason"):
-            data["contactability_reason"] = self._contactability_reason(routes)
+        data["contact_routes"] = routes
+        data["contact_research_clues"] = clues
+        data["contactability_score"] = score
+        data["contactability_label"] = self._contactability_label(score)
+        data["contactability_reason"] = self._contactability_reason(routes, clues)
 
     def _infer_contact_routes(self, candidate: Dict[str, Any]) -> list[str]:
         routes = []
@@ -135,42 +130,58 @@ Return valid JSON only:
         if candidate.get("email"):
             routes.append("public email")
 
+        if self._bio_has_contact_text(candidate.get("bio")):
+            routes.append("bio contact text")
+
         if candidate.get("blog_url"):
             routes.append("website/blog")
 
         if candidate.get("twitter_username"):
             routes.append("social profile")
 
+        return routes
+
+    def _infer_contact_research_clues(self, candidate: Dict[str, Any]) -> list[str]:
+        clues = []
+
         if candidate.get("company"):
-            routes.append("company field")
+            clues.append("company field")
 
         if candidate.get("github_profile_url"):
-            routes.append("GitHub profile")
+            clues.append("GitHub profile")
 
-        return routes
+        return clues
+
+    def _bio_has_contact_text(self, bio: Any) -> bool:
+        if not isinstance(bio, str):
+            return False
+
+        bio_lower = bio.lower()
+        return "@" in bio_lower or "contact" in bio_lower or "email" in bio_lower
 
     def _infer_contactability_score(
         self,
         routes: list[str],
+        clues: list[str],
         candidate: Dict[str, Any],
     ) -> int:
         if candidate.get("email"):
             return 90
 
+        if "bio contact text" in routes:
+            return 80
+
         if candidate.get("blog_url") and candidate.get("twitter_username"):
             return 75
 
         if candidate.get("blog_url") or candidate.get("twitter_username"):
-            return 65
+            return 60
 
-        if candidate.get("company"):
-            return 45
-
-        if candidate.get("github_profile_url"):
-            return 30
+        if clues:
+            return 25
 
         if routes:
-            return 25
+            return 20
 
         return 0
 
@@ -186,8 +197,15 @@ Return valid JSON only:
 
         return "NONE"
 
-    def _contactability_reason(self, routes: list[str]) -> str:
+    def _contactability_reason(self, routes: list[str], clues: list[str]) -> str:
         if routes:
-            return "Visible contact routes: " + ", ".join(routes) + "."
+            return "Direct visible contact routes: " + ", ".join(routes) + "."
+
+        if clues:
+            return (
+                "No direct contact route found. Research clues: "
+                + ", ".join(clues)
+                + "."
+            )
 
         return "No visible contact route found in the candidate data."

@@ -185,6 +185,7 @@ Return valid JSON only:
             "contactability_label": decision.get("contactability_label"),
             "contactability_reason": decision.get("contactability_reason"),
             "contact_routes": decision.get("contact_routes", []),
+            "contact_research_clues": decision.get("contact_research_clues", []),
         }
 
     def _review_single_candidate(

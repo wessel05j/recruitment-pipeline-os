@@ -10,8 +10,6 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    ListFlowable,
-    ListItem,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
@@ -184,19 +182,19 @@ class ShortlistPDFGenerator:
                 self._text(candidate.get("technical_fit_summary", "No summary available.")),
                 styles["body"],
             ),
-            Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm),
             Paragraph("Why Selected", styles["subsection"]),
             self._bullet_list(candidate.get("why_selected", []), styles),
-            Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm),
             Paragraph("Possible Concerns", styles["subsection"]),
             self._bullet_list(candidate.get("possible_concerns", []), styles),
-            Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm),
             Paragraph("Suggested Questions", styles["subsection"]),
             self._bullet_list(candidate.get("suggested_questions", []), styles),
-            Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm),
             Paragraph("GitHub Evidence", styles["section"]),
             self._evidence_table(evidence, styles),
-            Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm),
             Paragraph("Notable Repositories", styles["subsection"]),
             self._repo_table(evidence.get("notable_repositories", []), styles),
         ]
@@ -289,7 +287,7 @@ class ShortlistPDFGenerator:
                 [
                     Paragraph(self._text(repo.get("name", "Unknown")), styles["table_value"]),
                     Paragraph(self._text(repo.get("language", "Not listed")), styles["table_value"]),
-                    Paragraph(str(repo.get("stars", "")), styles["table_value"]),
+                    Paragraph(self._text(repo.get("stars") if repo.get("stars") is not None else "-"), styles["table_value"]),
                     Paragraph(self._text(repo.get("description", "Not listed")), styles["table_value"]),
                 ]
             )
@@ -312,18 +310,30 @@ class ShortlistPDFGenerator:
         self,
         items: List[str],
         styles: Dict[str, ParagraphStyle],
-    ) -> ListFlowable:
+    ) -> Table:
         if not items:
             items = ["Not listed."]
 
-        return ListFlowable(
+        rows = [
             [
-                ListItem(Paragraph(self._text(item), styles["body"]), leftIndent=4 * mm)
-                for item in items
-            ],
-            bulletType="bullet",
-            leftIndent=6 * mm,
+                Paragraph("-", styles["table_value"]),
+                Paragraph(self._text(item), styles["table_value"]),
+            ]
+            for item in items[:2]
+        ]
+        table = Table(rows, colWidths=[5 * mm, 161 * mm])
+        table.setStyle(
+            TableStyle(
+                [
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                    ("TOPPADDING", (0, 0), (-1, -1), 1),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+                ]
+            )
         )
+        return table
 
     def _styles(self) -> Dict[str, ParagraphStyle]:
         base = getSampleStyleSheet()

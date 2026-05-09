@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from app.ai.openai_model import OpenAIModel
 
@@ -34,6 +34,11 @@ Important:
 - Missing website/social routes should be written naturally as missing contact routes.
 - Use GitHub evidence: languages, signal matches, latest activity, followers, repo count, and top repositories.
 - Keep text client-ready, concise, and factual.
+- technical_fit_summary must be 40-70 words.
+- why_selected must contain at most 2 bullets.
+- possible_concerns must contain at most 2 bullets.
+- suggested_questions must contain at most 2 bullets.
+- notable_repositories must contain at most 3 repositories.
 
 Return valid JSON only:
 {
@@ -112,6 +117,7 @@ Return valid JSON only:
 
         result = self.ai.run(json.dumps(payload, ensure_ascii=False, indent=2))
         parsed = self._parse_json(result["answer"])
+        self._normalize_report(parsed, admin_pass)
         parsed["metadata"] = result["metadata"]
 
         return self._save_output(parsed)
@@ -167,3 +173,157 @@ Return valid JSON only:
             data["role_summary"] = "Role summary not available."
 
         return data
+
+    def _normalize_report(
+        self,
+        report: Dict[str, Any],
+        admin_pass: Dict[str, Any],
+    ) -> None:
+        source_candidates = {
+            item.get("rank"): item for item in admin_pass.get("candidates", [])
+        }
+
+        for candidate in report.get("candidates", []):
+            source = source_candidates.get(candidate.get("rank"), {})
+            self._normalize_candidate(candidate, source)
+
+        report["candidate_count"] = len(report.get("candidates", []))
+
+    def _normalize_candidate(
+        self,
+        candidate: Dict[str, Any],
+        source: Dict[str, Any],
+    ) -> None:
+        source_candidate = source.get("candidate", {})
+        source_assessment = source.get("assessment", {})
+
+        candidate["rank"] = source.get("rank", candidate.get("rank"))
+        candidate["display_name"] = candidate.get("display_name") or (
+            source_candidate.get("name")
+            or source_candidate.get("username")
+            or "Unknown candidate"
+        )
+        candidate["github_profile_url"] = (
+            source_candidate.get("github_profile_url")
+            or candidate.get("github_profile_url")
+            or ""
+        )
+        candidate["score"] = source_assessment.get("final_score", candidate.get("score"))
+        candidate["recommendation"] = source_assessment.get(
+            "recommendation",
+            candidate.get("recommendation"),
+        )
+
+        candidate["technical_fit_summary"] = self._shorten(
+            candidate.get("technical_fit_summary")
+            or source_assessment.get("summary")
+            or "No technical fit summary available.",
+            max_words=70,
+        )
+        candidate["why_selected"] = self._limit_list(
+            candidate.get("why_selected") or source_assessment.get("key_strengths", []),
+            limit=2,
+        )
+        candidate["possible_concerns"] = self._limit_list(
+            candidate.get("possible_concerns") or source_assessment.get("key_concerns", []),
+            limit=2,
+        )
+        candidate["suggested_questions"] = self._limit_list(
+            candidate.get("suggested_questions", []),
+            limit=2,
+        )
+        if not candidate["suggested_questions"]:
+            candidate["suggested_questions"] = [
+                "Which public repository best represents the work most relevant to this role?",
+                "What parts of this work were used in a real workflow or production-like setting?",
+            ]
+
+        candidate["contactability"] = self._contactability(source_assessment)
+        candidate["profile"] = self._profile(source_candidate)
+        candidate["github_evidence"] = self._github_evidence(source_candidate)
+
+    def _contactability(self, assessment: Dict[str, Any]) -> Dict[str, Any]:
+        routes = assessment.get("contact_routes", [])
+        clues = assessment.get("contact_research_clues", [])
+        note = assessment.get("contactability_reason") or "No contactability note."
+
+        if clues and not routes:
+            note = note + " Research required before outreach."
+
+        return {
+            "label": assessment.get("contactability_label", "NONE"),
+            "score": assessment.get("contactability_score", 0),
+            "routes": routes,
+            "research_clues": clues,
+            "note": note,
+        }
+
+    def _profile(self, candidate: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "location": candidate.get("location") or "Not listed",
+            "company": candidate.get("company") or "Not listed",
+            "public_email": candidate.get("email") or "No public email found",
+            "website": candidate.get("blog_url") or "Not listed",
+            "social": candidate.get("twitter_username") or "Not listed",
+            "followers": candidate.get("followers"),
+            "repo_count": candidate.get("repo_count"),
+            "latest_activity": candidate.get("latest_repo_push") or "Not listed",
+        }
+
+    def _github_evidence(self, candidate: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "matched_languages": candidate.get("matched_languages", []),
+            "signal_matches": self._signal_match_lines(
+                candidate.get("signal_matches", [])
+            ),
+            "notable_repositories": self._notable_repositories(
+                candidate.get("top_starred_repos", [])
+            ),
+        }
+
+    def _signal_match_lines(self, signal_matches: List[Dict[str, Any]]) -> List[str]:
+        lines = []
+
+        for match in signal_matches[:8]:
+            key = match.get("key")
+            fields = ", ".join(match.get("matched_fields", []))
+            if key and fields:
+                lines.append(f"{key}: {fields}")
+            elif key:
+                lines.append(str(key))
+
+        return lines
+
+    def _notable_repositories(
+        self,
+        repositories: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        notable = []
+
+        for repo in repositories[:3]:
+            notable.append(
+                {
+                    "name": repo.get("name") or "Unknown",
+                    "description": repo.get("description") or "Not listed",
+                    "stars": repo.get("stars"),
+                    "language": repo.get("language") or "Not listed",
+                    "url": repo.get("url") or "",
+                }
+            )
+
+        return notable
+
+    def _limit_list(self, items: Any, limit: int) -> List[str]:
+        if not isinstance(items, list):
+            return []
+
+        return [self._shorten(item, max_words=28) for item in items[:limit] if item]
+
+    def _shorten(self, value: Any, max_words: int) -> str:
+        text = str(value or "").strip()
+        words = text.split()
+
+        if len(words) <= max_words:
+            return text
+
+        return " ".join(words[:max_words]).rstrip(".,;:") + "..."

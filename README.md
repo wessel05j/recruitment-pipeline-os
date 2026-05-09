@@ -57,7 +57,10 @@ Add your keys:
 ```bash
 GITHUB_TOKEN=your_token_here
 OPENAI_API_KEY=your_token_here
+REVIEW_CANDIDATE_LIMIT=5
 ```
+
+`REVIEW_CANDIDATE_LIMIT` controls how many saved candidates are reviewed with AI. Use a positive number such as `5`, or `all` to review every saved candidate.
 
 ## 4. Run project
 
