@@ -98,11 +98,11 @@ def main():
                 search_params = json.load(file)
             location = search_params["location"]
             required_languages = search_params["required_languages"]
-            bio_keys = search_params["bio_keys"]
+            signal_keys = search_params.get("signal_keys", search_params.get("bio_keys", []))
             runner = GitHubCandidateSearchRunner(
                 location=location,
                 required_languages=required_languages,
-                bio_keys=bio_keys,
+                signal_keys=signal_keys,
             )
             runner.run()
 

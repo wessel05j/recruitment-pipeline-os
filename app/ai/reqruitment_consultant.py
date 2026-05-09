@@ -15,7 +15,7 @@ class RecruitmentConsultant:
     Output:
     - location: str
     - required_languages: list[str]
-    - bio_keys: list[str]
+    - signal_keys: list[str]
     """
 
     INPUT_PATH = Path("app/temp/job_brief.txt")
@@ -33,7 +33,7 @@ GitHubCandidateSearcher
 GitHubCandidateSearcher requires:
 1. location: exactly one country or city string.
 2. required_languages: list of programming languages only.
-3. bio_keys: list of high-signal single-word keywords likely to appear in serious GitHub bios.
+3. signal_keys: list of high-signal single-word keywords likely to appear in GitHub bios or repository metadata.
 
 Rules:
 - Return valid JSON only.
@@ -47,16 +47,16 @@ Rules:
 - required_languages must only contain actual programming languages.
 - location must be one clear location. If the job says Norway, use "Norway". If it says Oslo, use "Oslo".
 
-Bio key strategy:
-- Return 8–14 bio_keys.
+Signal key strategy:
+- Return 8–20 signal_keys.
 - Quality over quantity.
-- Every bio_key must be exactly ONE word.
-- Bio keys must be optimized for GitHub profile bios, not job descriptions.
+- Every signal_key must be exactly ONE word.
+- Signal keys must be optimized for GitHub profile bios, repository names, repository descriptions, and repository topics, not job descriptions.
 - Prefer keywords that a relevant candidate might realistically use to describe themselves, their specialty, their tooling, or their domain.
 - Prefer terms that identify candidates with matching public projects or technical identity.
 - Avoid filler. If only 8 strong keys exist, return 8.
 
-Bio key selection order:
+Signal key selection order:
 1. Include the strongest single-word role identity keywords from the job brief.
    - These are words that describe what the candidate does professionally.
    - They are allowed even if somewhat broad, as long as they are central to the role.
@@ -84,7 +84,7 @@ Do not include:
 - Seniority, years of experience, employment type, or location.
 - Broad engineering hygiene terms: "Git", "Testing", "Documentation", "Logging", "CleanCode", "BestPractices".
 - Low-signal implementation details: "JSON", "HTTP", "REST", "requests", "scripts", "utilities", "validation", "parsing".
-- Programming languages in bio_keys unless the word is also a meaningful role/domain identity.
+- Programming languages in signal_keys unless the word is also a meaningful role/domain identity.
 - Multi-word phrases.
 
 Conversion rules:
@@ -99,7 +99,7 @@ Conversion rules:
 - "CSV processing" -> "CSV" only if CSV/Excel processing is central
 - "API integration" -> usually exclude "API" unless integrations are a major sourcing signal
 
-Good bio_keys examples:
+Good signal_keys examples:
 - "Automation"
 - "RPA"
 - "Excel"
@@ -116,28 +116,24 @@ Good bio_keys examples:
 - "Visma"
 - "Dynamics"
 
-Bad bio_keys examples:
+Bad signal_keys examples:
 - "Automation Developer"
 - "Finance Automation"
 - "Accounting Automation"
 - "Software Engineer"
 - "Developer"
 - "Engineer"
-- "Python"
 - "Norway"
 - "Remote"
 - "Junior"
 - "Git"
-- "Testing"
 - "requests"
 - "JSON"
-- "HTTP"
-- "Documentation"
 - "problem solving"
 
 Before returning, silently check:
-- Are all bio_keys one word?
-- Are there 8–14 bio_keys?
+- Are all signal_keys one word?
+- Are there 8–20 signal_keys?
 - Did I include the strongest role identity keywords when they are central?
 - Did I avoid generic software words?
 - Did I avoid implementation details that are unlikely to appear in bios?
@@ -149,8 +145,8 @@ JSON format example:
   "source": "github",
   "location": "Norway",
   "required_languages": ["Python"],
-  "bio_keys": ["Automation", "RPA", "Excel", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Accounting", "Tripletex", "Visma"],
-  "reasoning": "Chosen for a Python-focused automation role in Norway. The bio keys prioritize central role identity, relevant automation tooling, data workflow skills, and accounting/ERP domain signals while avoiding generic software terms and low-signal implementation details."
+  "signal_keys": ["Automation", "RPA", "Excel", "pandas", "openpyxl", "UiPath", "PowerAutomate", "ETL", "Accounting", "Tripletex", "Visma"],
+  "reasoning": "Chosen for a Python-focused automation role in Norway. The signal keys prioritize central role identity, relevant automation tooling, data workflow skills, and accounting/ERP domain signals while avoiding generic software terms and low-signal implementation details."
 }
 """
 
@@ -210,6 +206,9 @@ JSON format example:
         if data.get("source") != "github":
             raise ValueError("source must be 'github'.")
 
+        if "signal_keys" not in data and "bio_keys" in data:
+            data["signal_keys"] = data.pop("bio_keys")
+
         if not data.get("location") or not isinstance(data["location"], str):
             raise ValueError("location must be a string.")
 
@@ -219,11 +218,11 @@ JSON format example:
         if not all(isinstance(lang, str) and lang.strip() for lang in data["required_languages"]):
             raise ValueError("Each required language must be a non-empty string.")
 
-        if not data.get("bio_keys") or not isinstance(data["bio_keys"], list):
-            raise ValueError("bio_keys must be a non-empty list.")
+        if not data.get("signal_keys") or not isinstance(data["signal_keys"], list):
+            raise ValueError("signal_keys must be a non-empty list.")
 
-        if not all(isinstance(key, str) and key.strip() for key in data["bio_keys"]):
-            raise ValueError("Each bio key must be a non-empty string.")
+        if not all(isinstance(key, str) and key.strip() for key in data["signal_keys"]):
+            raise ValueError("Each signal key must be a non-empty string.")
 
-        if len(data["bio_keys"]) > 20:
-            raise ValueError("bio_keys should not contain more than 10 items.")
+        if len(data["signal_keys"]) > 20:
+            raise ValueError("signal_keys should not contain more than 20 items.")

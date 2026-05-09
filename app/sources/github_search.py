@@ -13,11 +13,11 @@ class GitHubCandidateSearchRunner:
         self,
         location: str,
         required_languages: List[str],
-        bio_keys: Optional[List[str]] = None,
+        signal_keys: Optional[List[str]] = None,
     ):
         self.location = location
         self.required_languages = required_languages
-        self.bio_keys = bio_keys or []
+        self.signal_keys = signal_keys or []
 
         self._validate()
 
@@ -27,8 +27,9 @@ class GitHubCandidateSearchRunner:
         candidates = searcher.search(
             location=self.location,
             required_languages=self.required_languages,
-            bio_keys=self.bio_keys,
+            signal_keys=self.signal_keys,
         )
+        funnel_metrics = searcher.get_funnel_metrics()
 
         self.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -39,7 +40,8 @@ class GitHubCandidateSearchRunner:
                 {
                     "location": self.location,
                     "required_languages": self.required_languages,
-                    "bio_keys": self.bio_keys,
+                    "signal_keys": self.signal_keys,
+                    "funnel_metrics": funnel_metrics,
                     "candidate_count": len(candidates),
                     "candidates": candidates,
                 },
@@ -60,5 +62,5 @@ class GitHubCandidateSearchRunner:
         if not all(isinstance(lang, str) and lang.strip() for lang in self.required_languages):
             raise ValueError("Each required language must be a non-empty string.")
 
-        if self.bio_keys and not all(isinstance(key, str) and key.strip() for key in self.bio_keys):
-            raise ValueError("Each bio key must be a non-empty string.")
+        if self.signal_keys and not all(isinstance(key, str) and key.strip() for key in self.signal_keys):
+            raise ValueError("Each signal key must be a non-empty string.")
