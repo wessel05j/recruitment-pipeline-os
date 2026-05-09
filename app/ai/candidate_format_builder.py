@@ -67,6 +67,7 @@ Return valid JSON only:
       "technical_fit_summary": "Short evidence-based fit summary.",
       "why_selected": ["reason 1", "reason 2"],
       "possible_concerns": ["concern 1", "concern 2"],
+      "suggested_questions": ["evidence-based interview or screening question"],
       "github_evidence": {
         "matched_languages": ["language 1"],
         "signal_matches": ["key matched in field"],

@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 from dotenv import load_dotenv
 
 from app.ai.account_manager import AccountManager
@@ -14,6 +15,7 @@ from app.reports.shortlist_pdf import ShortlistPDFGenerator
 PROJECT_NAME = "recruitment-pipeline-os"
 CREATOR = "Erich Johannes Wessel"
 REPOSITORY_URL = "https://github.com/wessel05j/recruitment-pipeline-os"
+TEMP_DIR = "app/temp"
 
 
 def print_banner() -> None:
@@ -36,6 +38,12 @@ def print_skip(message: str) -> None:
 
 def print_done(message: str) -> None:
     print(f"[done] {message}")
+
+
+def cleanup_temp_files() -> None:
+    if os.path.exists(TEMP_DIR):
+        shutil.rmtree(TEMP_DIR)
+        print_done(f"Temporary files cleaned from {TEMP_DIR}.")
 
 
 def init():
@@ -187,17 +195,14 @@ def main():
         # Export to PDF - Generate final report
         ###########################################################
         print_section("PDF Report")
-        pdf_path = "app/output/github_candidate_shortlist.pdf"
-        if os.path.exists(pdf_path):
-            print_skip(f"PDF report already exists at {pdf_path}.")
-        else:
-            pdf = ShortlistPDFGenerator()
-            output_path = pdf.run()
-            print_done(f"PDF report saved to {output_path}.")
+        pdf = ShortlistPDFGenerator()
+        output_path = pdf.run()
+        print_done(f"PDF report saved to {output_path}.")
 
         print_section("Pipeline Complete")
         print_done("V1 pipeline finished.")
-        print(f"Final PDF: {pdf_path}")
+        cleanup_temp_files()
+        print(f"Final PDF: {output_path}")
         print(f"Project: {REPOSITORY_URL}")
 
         
