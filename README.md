@@ -6,6 +6,10 @@ It takes a rough hiring request and turns it into a structured process: job unde
 
 Important V1 limitation: this works best for technical roles where GitHub activity is a useful signal. It is not a general-purpose recruiting database, and it should not be used as a final hiring decision system.
 
+### Pipeline
+
+<img width="1672" height="941" alt="ChatGPT Image 10  mai 2026, 12_01_04" src="https://github.com/user-attachments/assets/75450b83-bbfb-4647-bb8f-da9567c40ee1" />
+
 ### Setup
 
 ## 1. Clone repo
@@ -69,7 +73,3 @@ app/output/github_candidate_shortlist.pdf
 ```
 
 Temporary pipeline files under `app/temp/` are cleaned after a successful run.
-
-### Pipeline
-
-<img width="1672" height="941" alt="ChatGPT Image 9  mai 2026, 10_45_43" src="https://github.com/user-attachments/assets/5accc2c5-85ca-4218-9de9-964aa5e765e6" />
