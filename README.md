@@ -15,7 +15,7 @@ Important V1 limitation: this works best for technical roles where GitHub activi
 ## 1. Clone repo
 
 ```bash
-git clone https://github.com/wessel05j/recruitment-pipeline-os
+git clone -b v1-public-release https://github.com/wessel05j/recruitment-pipeline-os
 cd recruitment-pipeline-os
 ```
 
