@@ -1,7 +1,6 @@
 import os
 import json
 import shutil
-from typing import Optional
 from dotenv import load_dotenv
 
 from app.ai.account_manager import AccountManager
@@ -45,25 +44,6 @@ def cleanup_temp_files() -> None:
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
         print_done(f"Temporary files cleaned from {TEMP_DIR}.")
-
-
-def get_review_candidate_limit() -> Optional[int]:
-    raw_limit = os.getenv("REVIEW_CANDIDATE_LIMIT", "all").strip().lower()
-
-    if raw_limit in {"all", "none", "unlimited"}:
-        return None
-
-    try:
-        limit = int(raw_limit)
-    except ValueError:
-        raise ValueError(
-            "REVIEW_CANDIDATE_LIMIT must be a positive integer or one of: all, none, unlimited."
-        )
-
-    if limit <= 0:
-        raise ValueError("REVIEW_CANDIDATE_LIMIT must be greater than zero.")
-
-    return limit
 
 
 def init():
@@ -170,15 +150,8 @@ def main():
         # Candidate review - Internal review of candidates
         ###########################################################
         print_section("Candidate Review")
-        review_limit = get_review_candidate_limit()
-        if review_limit is None:
-            print("Reviewing all saved candidates. Existing reviews will be reused.")
-        else:
-            print(
-                f"Reviewing up to {review_limit} saved candidates. Existing reviews will be reused."
-            )
-
-        panel = CandidateReviewPanel(max_candidates=review_limit)
+        print("Reviewing all saved candidates. Existing reviews will be reused.")
+        panel = CandidateReviewPanel()
         review_paths = panel.run()
 
         for path in review_paths:
