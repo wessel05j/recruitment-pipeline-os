@@ -4,9 +4,6 @@ V1 of `recruitment-pipeline-os` is a terminal-based recruitment pipeline for fin
 
 It takes a rough hiring request and turns it into a structured process: job understanding, GitHub search planning, candidate sourcing, candidate review, admin review, ranked shortlist formatting, and a client-ready PDF report.
 
-Creator: Erich Johannes Wessel  
-Repository: https://github.com/wessel05j/recruitment-pipeline-os
-
 Important V1 limitation: this works best for technical roles where GitHub activity is a useful signal. It is not a general-purpose recruiting database, and it should not be used as a final hiring decision system.
 
 ### Setup
@@ -57,12 +54,7 @@ Add your keys:
 ```bash
 GITHUB_TOKEN=your_token_here
 OPENAI_API_KEY=your_token_here
-REVIEW_CANDIDATE_LIMIT=all
 ```
-
-`REVIEW_CANDIDATE_LIMIT` controls how many saved candidates are reviewed with AI. The V1 default is `all`, because sourcing already keeps the top 20 candidates after local source-fit ranking. Use a positive number such as `5` when you want a cheaper test run.
-
-GitHub sourcing collects a broad pool by location, required language, minimum repositories, and minimum followers. It then ranks candidates locally by source-fit evidence such as signal-key matches in bios and repository metadata. Followers and stars are kept as metadata, not the main ranking logic.
 
 ## 4. Run project
 
