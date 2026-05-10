@@ -1,10 +1,11 @@
 import os
+import re
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 
 load_dotenv()
 
@@ -35,6 +36,8 @@ class OpenAIModel:
         system_prompt: str,
         model: str = "gpt-5-mini",
         api_key: Optional[str] = None,
+        use_memory: bool = True,
+        max_retries: int = 3,
     ):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
 
@@ -50,6 +53,8 @@ class OpenAIModel:
         self.model = model
         self.system_prompt = system_prompt
         self.client = OpenAI(api_key=self.api_key)
+        self.use_memory = use_memory
+        self.max_retries = max_retries
 
         self.memory: List[Dict[str, str]] = []
         self.last_warning: Optional[str] = None
@@ -58,31 +63,25 @@ class OpenAIModel:
         if not user_message or not isinstance(user_message, str):
             raise ValueError("user_message is required and must be a non-empty string.")
 
-        self.memory.append(
-            {
-                "role": "user",
-                "content": user_message,
-            }
-        )
+        input_messages = self._build_input(user_message)
 
         started_at = time.perf_counter()
 
-        response = self.client.responses.create(
-            model=self.model,
-            instructions=self.system_prompt,
-            input=self.memory,
+        response = self._create_response_with_retry(
+            input_messages=input_messages,
         )
 
         duration_seconds = round(time.perf_counter() - started_at, 3)
 
         answer = response.output_text
 
-        self.memory.append(
-            {
-                "role": "assistant",
-                "content": answer,
-            }
-        )
+        if self.use_memory:
+            self.memory.append(
+                {
+                    "role": "assistant",
+                    "content": answer,
+                }
+            )
 
         usage_data = self._extract_usage(response)
         context_data = self._calculate_context_usage(usage_data)
@@ -113,6 +112,52 @@ class OpenAIModel:
 
     def reset_memory(self) -> None:
         self.memory = []
+
+    def _build_input(self, user_message: str) -> List[Dict[str, str]]:
+        message = {
+            "role": "user",
+            "content": user_message,
+        }
+
+        if not self.use_memory:
+            return [message]
+
+        self.memory.append(message)
+        return self.memory
+
+    def _create_response_with_retry(
+        self,
+        input_messages: List[Dict[str, str]],
+    ) -> Any:
+        attempt = 0
+
+        while True:
+            try:
+                return self.client.responses.create(
+                    model=self.model,
+                    instructions=self.system_prompt,
+                    input=input_messages,
+                )
+            except RateLimitError as error:
+                attempt += 1
+
+                if attempt > self.max_retries:
+                    raise
+
+                delay = self._rate_limit_delay(error, attempt)
+                print(
+                    f"OpenAI rate limit reached. Waiting {round(delay, 1)}s before retry {attempt}/{self.max_retries}."
+                )
+                time.sleep(delay)
+
+    def _rate_limit_delay(self, error: RateLimitError, attempt: int) -> float:
+        message = str(error)
+        match = re.search(r"try again in ([0-9.]+)s", message)
+
+        if match:
+            return max(float(match.group(1)) + 1.0, 1.0)
+
+        return min(2.0 * attempt, 10.0)
 
     def _extract_usage(self, response: Any) -> Dict[str, Optional[int]]:
         usage = getattr(response, "usage", None)

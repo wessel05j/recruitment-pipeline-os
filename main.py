@@ -170,21 +170,19 @@ def main():
         # Candidate review - Internal review of candidates
         ###########################################################
         print_section("Candidate Review")
-        review_path = "app/temp/candidate_reviews/"
-        if os.path.exists(review_path):
-            print_skip(f"Candidate review already exists at {review_path}.")
+        review_limit = get_review_candidate_limit()
+        if review_limit is None:
+            print("Reviewing all saved candidates. Existing reviews will be reused.")
         else:
-            review_limit = get_review_candidate_limit()
-            if review_limit is None:
-                print("Reviewing all saved candidates.")
-            else:
-                print(f"Reviewing up to {review_limit} saved candidates.")
+            print(
+                f"Reviewing up to {review_limit} saved candidates. Existing reviews will be reused."
+            )
 
-            panel = CandidateReviewPanel(max_candidates=review_limit)
-            review_paths = panel.run()
-            
-            for path in review_paths:
-                print_done(f"Candidate review saved: {path}")
+        panel = CandidateReviewPanel(max_candidates=review_limit)
+        review_paths = panel.run()
+
+        for path in review_paths:
+            print_done(f"Candidate review available: {path}")
 
 
         ###########################################################

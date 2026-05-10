@@ -81,7 +81,11 @@ If round = 2 or 3, return valid JSON only in this format:
 """
 
     def __init__(self) -> None:
-        self.ai = OpenAIModel(system_prompt=self.SYSTEM_PROMPT, model="gpt-5-mini")
+        self.ai = OpenAIModel(
+            system_prompt=self.SYSTEM_PROMPT,
+            model="gpt-5-mini",
+            use_memory=False,
+        )
 
     def run(
         self,

@@ -89,7 +89,11 @@ Return valid JSON only:
 """
 
     def __init__(self) -> None:
-        self.ai = OpenAIModel(system_prompt=self.SYSTEM_PROMPT, model="gpt-5-mini")
+        self.ai = OpenAIModel(
+            system_prompt=self.SYSTEM_PROMPT,
+            model="gpt-5-mini",
+            use_memory=False,
+        )
 
     def run(
         self,

@@ -202,6 +202,7 @@ Return valid JSON only:
         ai = OpenAIModel(
             system_prompt=self.SYSTEM_PROMPT,
             model="gpt-5-mini",
+            use_memory=False,
         )
 
         payload = {

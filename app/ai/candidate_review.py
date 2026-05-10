@@ -28,6 +28,15 @@ class CandidateReviewPanel:
         output_paths = []
 
         for index, candidate in enumerate(candidates, start=1):
+            existing_path = self._candidate_review_path(candidate)
+
+            if existing_path.exists():
+                print(
+                    f"Skipping candidate {index}/{len(candidates)}: {candidate.get('username')} already reviewed"
+                )
+                output_paths.append(existing_path)
+                continue
+
             print(f"Reviewing candidate {index}/{len(candidates)}: {candidate.get('username')}")
 
             review = self._review_candidate(job_brief, candidate)
@@ -53,7 +62,8 @@ class CandidateReviewPanel:
                 previous_arguments=previous_arguments,
             )
 
-            previous_arguments.append(advocate_argument)
+            clean_advocate_argument = self._without_metadata(advocate_argument)
+            previous_arguments.append(clean_advocate_argument)
 
             skeptic_argument = self.skeptic.run(
                 round_number=round_number,
@@ -62,11 +72,12 @@ class CandidateReviewPanel:
                 previous_arguments=previous_arguments,
             )
 
-            previous_arguments.append(skeptic_argument)
+            clean_skeptic_argument = self._without_metadata(skeptic_argument)
+            previous_arguments.append(clean_skeptic_argument)
 
             debate[f"round_{round_number}"] = {
-                "advocate": advocate_argument,
-                "skeptic": skeptic_argument,
+                "advocate": clean_advocate_argument,
+                "skeptic": clean_skeptic_argument,
             }
 
         decision = self.manager.run(
@@ -79,6 +90,13 @@ class CandidateReviewPanel:
             "candidate": candidate,
             "debate": debate,
             "decision": decision,
+        }
+
+    def _without_metadata(self, argument: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            key: value
+            for key, value in argument.items()
+            if key != "metadata"
         }
 
     def _load_job_brief(self) -> str:
@@ -104,15 +122,19 @@ class CandidateReviewPanel:
     def _save_candidate_review(self, review: Dict[str, Any]) -> Path:
         self.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-        username = review["candidate"].get("username", "unknown")
-        safe_username = "".join(
-            char for char in username if char.isalnum() or char in ["-", "_"]
-        )
-
-        output_path = self.OUTPUT_DIR / f"{safe_username}.json"
+        output_path = self._candidate_review_path(review["candidate"])
 
         with output_path.open("w", encoding="utf-8") as file:
             json.dump(review, file, ensure_ascii=False, indent=2)
 
         print(f"Saved review: {output_path}")
         return output_path
+
+    def _candidate_review_path(self, candidate: Dict[str, Any]) -> Path:
+        safe_username = "".join(
+            char
+            for char in candidate.get("username", "unknown")
+            if char.isalnum() or char in ["-", "_"]
+        )
+
+        return self.OUTPUT_DIR / f"{safe_username}.json"

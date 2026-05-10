@@ -97,6 +97,7 @@ Return valid JSON only:
         self.ai = OpenAIModel(
             system_prompt=self.SYSTEM_PROMPT,
             model="gpt-5-mini",
+            use_memory=False,
         )
 
     def run(self) -> Path:
