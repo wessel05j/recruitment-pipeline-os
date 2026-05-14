@@ -4,6 +4,10 @@ V1 of `recruitment-pipeline-os` is a terminal-based recruitment pipeline for fin
 
 It takes a rough hiring request and turns it into a structured process: job understanding, GitHub search planning, candidate sourcing, candidate review, admin review, ranked shortlist formatting, and a client-ready PDF report.
 
+### AI model
+
+The project currently uses OpenAI's `gpt-5-mini` model for the AI-assisted pipeline steps, including job brief creation, search planning, candidate debate/review, admin review, and report formatting.
+
 Important V1 limitation: this works best for technical roles where GitHub activity is a useful signal. It is not a general-purpose recruiting database, and it should not be used as a final hiring decision system.
 
 ### Pipeline
